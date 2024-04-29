@@ -1,13 +1,14 @@
 package SogangSolutionShare.BE.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.sql.ast.tree.expression.Over;
+
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -21,5 +22,15 @@ public class Member {
     private Long kakaoId;
 
     private String name;
+
+    private String email;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
+
+
 
 }
