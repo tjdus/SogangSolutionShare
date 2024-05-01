@@ -1,7 +1,7 @@
 package SogangSolutionShare.BE.infra.oauth.kakao;
 
-import SogangSolutionShare.BE.domain.OauthCodeRequestUriProvider;
-import SogangSolutionShare.BE.domain.OauthServerType;
+import SogangSolutionShare.BE.domain.Oauth.OauthCodeRequestUriProvider;
+import SogangSolutionShare.BE.domain.Oauth.OauthServerType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
