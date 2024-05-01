@@ -25,14 +25,14 @@ public class MemberController {
     }
 
     // 회원 정보 수정 API
-    /*@PatchMapping("/{memberId}")
-    public void updateMember(@PathVariable Long memberId, MemberDTO memberDTO) {
+    @PatchMapping("/{memberId}")
+    public void updateMember(@PathVariable("memberId") Long memberId, MemberDTO memberDTO) {
         memberService.updateMember(memberId, memberDTO);
-    }*/
+    }
 
     // 회원 질문 조회 API
     @GetMapping("/{memberId}/question")
-    public ResponseEntity<List<Question>> getQuestions(@PathVariable Long memberId) {
+    public ResponseEntity<List<Question>> getQuestions(@PathVariable("memberId") Long memberId) {
         List<Question> questions = questionService.getQuestions(memberId);
         return ResponseEntity.ok(questions);
     }

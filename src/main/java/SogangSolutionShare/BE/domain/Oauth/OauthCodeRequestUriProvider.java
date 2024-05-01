@@ -1,4 +1,4 @@
-package SogangSolutionShare.BE.domain;
+package SogangSolutionShare.BE.domain.Oauth;
 
 public interface OauthCodeRequestUriProvider {
     OauthServerType getOauthServerType();
