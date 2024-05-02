@@ -13,11 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/question")
 @RequiredArgsConstructor
 @Slf4j
-public class QuestionAnswerController {
+public class QuestionController {
 
     private final QuestionService questionService;
-    private final AnswerService answerService;
-
 
     // 질문 작성 API
     @PostMapping
@@ -38,24 +36,6 @@ public class QuestionAnswerController {
     @DeleteMapping("/{questionId}")
     public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId) {
         questionService.deleteQuestion(questionId);
-        return ResponseEntity.ok().build();
-    }
-
-    // 질문에 답변 작성 API
-    @PostMapping("/{questionId}/answer")
-    public ResponseEntity<Void> createAnswer(@PathVariable("questionId") Long questionId, @ModelAttribute AnswerDTO answerDTO) {
-        log.info("AnswerDTO: {}", answerDTO);
-        answerService.createAnswer(questionId, answerDTO);
-
-        return ResponseEntity.ok().build();
-    }
-
-    // 질문에 답변 수정 API
-    @PatchMapping("/{questionId}/answer/{answerId}")
-    public ResponseEntity<Void> updateAnswer(@PathVariable("questionId") Long questionId, @PathVariable Long answerId, String content) {
-
-        answerService.updateAnswer(questionId, answerId, content);
-
         return ResponseEntity.ok().build();
     }
 }

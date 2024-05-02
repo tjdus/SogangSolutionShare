@@ -3,9 +3,7 @@ package SogangSolutionShare.BE.domain.dto;
 import lombok.Data;
 
 @Data
-public class AnswerDTO {
-    private Long questionId;
+public class AnswerLikeDTO {
+    private Long answerId;
     private Long memberId;
-    private String content;
-
 }

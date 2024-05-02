@@ -21,31 +21,27 @@ public class AnswerService {
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
     private final MemberRepository memberRepository;
-    public void createAnswer(Long questionId, AnswerDTO answerDTO) {
+    public void createAnswer(AnswerDTO answerDTO) {
 
         // questionId로 Question 찾아서 없으면 예외처리
-        Question question = questionRepository.findById(questionId).orElseThrow(() -> new IllegalArgumentException("Question does not exist"));
+        Question question = questionRepository.findById(answerDTO.getQuestionId()).orElseThrow(() -> new IllegalArgumentException("Question does not exist"));
 
         // memberId로 Member 찾아서 없으면 예외처리
         Member member = memberRepository.findById(answerDTO.getMemberId()).orElseThrow(() -> new IllegalArgumentException("Member does not exist"));
 
         // Answer 생성하고 저장
-        Answer createdAnswer = new Answer();
-        createdAnswer.setQuestion(question);
-        createdAnswer.setMember(member);
-        createdAnswer.setContent(answerDTO.getContent());
+        Answer createdAnswer = Answer.builder()
+                .question(question)
+                .member(member)
+                .content(answerDTO.getContent())
+                .build();
 
         log.info("Answer created: {}", createdAnswer);
 
         answerRepository.save(createdAnswer);
-
     }
 
-    public void updateAnswer(Long questionId, Long answerId, String content) {
-
-            // questionId로 Question 찾아서 없으면 예외처리
-            Question question = questionRepository.findById(questionId).orElseThrow(() -> new IllegalArgumentException("Question does not exist"));
-
+    public void updateAnswer(Long answerId, String content) {
             // answerId로 Answer 찾아서 없으면 예외처리
             Answer answer = answerRepository.findById(answerId).orElseThrow(() -> new IllegalArgumentException("Answer does not exist"));
 
@@ -53,7 +49,5 @@ public class AnswerService {
             answer.setContent(content);
 
             log.info("Answer updated: {}", answer);
-
-            answerRepository.save(answer);
     }
 }
