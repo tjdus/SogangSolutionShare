@@ -24,6 +24,7 @@ public class MemberController {
     public ResponseEntity<Void> createMember(@ModelAttribute MemberDTO memberDTO) {
         memberService.createMember(memberDTO);
 
+
         return ResponseEntity.ok().build();
     }
 
