@@ -21,9 +21,10 @@ public class MemberService {
         }
 
         // Member 생성하고 저장
-        Member member = new Member();
-        member.setEmail(memberDTO.getEmail());
-        member.setName(memberDTO.getName());
+        Member member = Member.builder()
+                .email(memberDTO.getEmail())
+                .name(memberDTO.getName())
+                .build();
 
         log.info("Member created: {}", member);
 
