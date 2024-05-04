@@ -1,5 +1,6 @@
 package SogangSolutionShare.BE.domain;
 
+import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -42,6 +44,8 @@ public class Question {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    private Long likeCount = 0L;
+
     @Override
     public String toString() {
         return "Question{" +
@@ -51,5 +55,8 @@ public class Question {
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
+    }
+    public QuestionDTO toDTO(List<String> tags) {
+        return new QuestionDTO(member.getId(), category.getName(), title, content, likeCount, tags);
     }
 }

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,9 +23,10 @@ public class MemberService {
         }
 
         // Member 생성하고 저장
-        Member member = new Member();
-        member.setEmail(memberDTO.getEmail());
-        member.setName(memberDTO.getName());
+        Member member = Member.builder()
+                .email(memberDTO.getEmail())
+                .name(memberDTO.getName())
+                .build();
 
         log.info("Member created: {}", member);
 
@@ -36,5 +39,9 @@ public class MemberService {
         member.setName(memberDTO.getName());
 
         log.info("Member updated: {}", member);
+    }
+
+    public List<Member> getMembers(){
+        return memberRepository.findAll();
     }
 }

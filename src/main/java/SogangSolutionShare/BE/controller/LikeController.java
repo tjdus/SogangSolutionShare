@@ -5,10 +5,7 @@ import SogangSolutionShare.BE.domain.dto.QuestionLikeDTO;
 import SogangSolutionShare.BE.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/like")
@@ -23,6 +20,14 @@ public class LikeController {
         likeService.createQuestionLike(questionLikeDTO);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/question")
+    public ResponseEntity<Void> deleteQuestionLike(@ModelAttribute QuestionLikeDTO questionLikeDTO) {
+        // 좋아요 생성 API
+        likeService.deleteQuestionLike(questionLikeDTO);
+        return ResponseEntity.ok().build();
+    }
+
 
     @PostMapping("/answer")
     public ResponseEntity<Void> createAnswerLike(@ModelAttribute AnswerLikeDTO answerLikeDTO) {

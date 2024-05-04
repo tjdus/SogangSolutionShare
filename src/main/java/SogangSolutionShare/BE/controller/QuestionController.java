@@ -1,13 +1,14 @@
 package SogangSolutionShare.BE.controller;
 
-import SogangSolutionShare.BE.domain.dto.AnswerDTO;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
-import SogangSolutionShare.BE.service.AnswerService;
 import SogangSolutionShare.BE.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/question")
@@ -37,5 +38,12 @@ public class QuestionController {
     public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId) {
         questionService.deleteQuestion(questionId);
         return ResponseEntity.ok().build();
+    }
+
+    // 질문 전체 조회
+    @GetMapping("/questions")
+    public ResponseEntity<List<QuestionDTO>> getAllQuestions(){
+        List<QuestionDTO> questions = questionService.getAll();
+        return ResponseEntity.ok(questions);
     }
 }
