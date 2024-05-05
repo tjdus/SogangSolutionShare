@@ -18,16 +18,6 @@ public class MemberController {
     private final MemberService memberService;
     private final QuestionService questionService;
 
-
-    // 회원 가입 API
-    @PostMapping
-    public ResponseEntity<Void> createMember(@ModelAttribute MemberDTO memberDTO) {
-        memberService.createMember(memberDTO);
-
-
-        return ResponseEntity.ok().build();
-    }
-
     // 회원 정보 수정 API
     @PatchMapping("/{memberId}")
     public void updateMember(@PathVariable("memberId") Long memberId, MemberDTO memberDTO) {

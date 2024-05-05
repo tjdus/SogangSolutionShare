@@ -26,6 +26,10 @@ public class Member {
     private Long id;
     private Long kakaoId;
 
+    private String loginId;
+
+    private String password;
+
     private String name;
 
     private String email;
