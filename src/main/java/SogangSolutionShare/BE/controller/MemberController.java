@@ -29,7 +29,7 @@ public class MemberController {
     // 회원 질문 조회 API
     @GetMapping("/{memberId}/question")
     public ResponseEntity<List<QuestionDTO>> getQuestions(@PathVariable("memberId") Long memberId) {
-        List<QuestionDTO> questions = questionService.getQuestions(memberId);
+        List<QuestionDTO> questions = questionService.findQuestionsByMemberId(memberId);
         return ResponseEntity.ok(questions);
     }
 

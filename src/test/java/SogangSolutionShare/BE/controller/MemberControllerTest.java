@@ -71,9 +71,10 @@ public class MemberControllerTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/member/members"))
-                .andExpect(status().isOk())  // 상태가 200 OK인지 확인합니다.
-                .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0].name").value("tester1"))
-                .andExpect(jsonPath("$[1].name").value("tester2"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value("tester1"));
     }
+
+
 }

@@ -5,6 +5,8 @@ import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import SogangSolutionShare.BE.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -69,6 +71,12 @@ public class QuestionService {
 
     }
 
+    public QuestionDTO findQuestion(Long questionId) {
+        Question question = questionRepository.findOneById(questionId);
+        List<String> tagNames = findTagNames(questionId);
+        return question.toDTO(tagNames);
+    }
+
     public void updateQuestion(Long questionId, QuestionDTO questionDTO) {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new IllegalArgumentException("Question does not exist"));
         question.setTitle(questionDTO.getTitle());
@@ -76,39 +84,30 @@ public class QuestionService {
 
         log.info("Question updated: {}", question);
     }
-
-    public List<QuestionDTO> getQuestions(Long memberId) {
+    private List<String> findTagNames(Long questionId) {
+        List<QuestionTag> questionTags = questionTagRepository.findByQuestionId(questionId);
+        return questionTags.stream()
+                .map(qt -> qt.getTag().getName())
+                .collect(Collectors.toList());
+    }
+    public List<QuestionDTO> findQuestionsByMemberId(Long memberId) {
         // memberId로 Member 찾아서 없으면 예외처리
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("Member does not exist"));
         List<Question> questionList = questionRepository.findAllByMemberId(member.getId());
         return questionList.stream()
                 .map(question -> {
-                    // 각 Question에 대한 Tag 리스트 가져오기
-                    List<QuestionTag> questionTags = questionTagRepository.findByQuestionId(question.getId());
-                    List<String> tagNames = questionTags.stream()
-                            .map(questionTag -> questionTag.getTag().getName()) // 태그 이름 추출
-                            .collect(Collectors.toList());
-
-                    // QuestionDTO에 태그 이름 리스트 포함
+                    List<String> tagNames = findTagNames(question.getId());
                     return question.toDTO(tagNames);
                 })
                 .collect(Collectors.toList());
     }
 
-    public List<QuestionDTO> getAll(){
-        List<Question> questionList = questionRepository.findAll();
-        return questionList.stream()
-                .map(question -> {
-                    // 각 Question에 대한 Tag 리스트 가져오기
-                    List<QuestionTag> questionTags = questionTagRepository.findByQuestionId(question.getId());
-                    List<String> tagNames = questionTags.stream()
-                            .map(questionTag -> questionTag.getTag().getName()) // 태그 이름 추출
-                            .collect(Collectors.toList());
-
-                    // QuestionDTO에 태그 이름 리스트 포함
+    public Page<QuestionDTO> findQuestions(Pageable pageable){
+        Page<Question> questionPage = questionRepository.findAll(pageable);
+        return questionPage.map(question -> {
+                    List<String> tagNames = findTagNames(question.getId());
                     return question.toDTO(tagNames);
-                })
-                .collect(Collectors.toList());
+                });
     }
 
     public void deleteQuestion(Long questionId) {
