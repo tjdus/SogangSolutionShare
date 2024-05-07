@@ -20,16 +20,6 @@ public class MemberController {
     private final MemberService memberService;
     private final QuestionService questionService;
 
-
-    // 회원 가입 API
-    @PostMapping
-    public ResponseEntity<Void> createMember(@ModelAttribute MemberDTO memberDTO) {
-        memberService.createMember(memberDTO);
-
-
-        return ResponseEntity.ok().build();
-    }
-
     // 회원 정보 수정 API
     @PatchMapping("/{memberId}")
     public void updateMember(@PathVariable("memberId") Long memberId, MemberDTO memberDTO) {
@@ -43,10 +33,11 @@ public class MemberController {
         return ResponseEntity.ok(questions);
     }
 
+    /* 테스트 용 추후 삭제해야함 */
     //회원 조회
     @GetMapping("/members")
-    public ResponseEntity<List<Member>> getMembers() {
-        List<Member> members = memberService.getMembers();
+    public ResponseEntity<List<MemberDTO>> getMembers() {
+        List<MemberDTO> members = memberService.getMembers();
         return ResponseEntity.ok(members);
 
     }

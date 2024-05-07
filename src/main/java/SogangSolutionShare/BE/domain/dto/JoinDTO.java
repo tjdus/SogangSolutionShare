@@ -1,12 +1,11 @@
 package SogangSolutionShare.BE.domain.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
-public class MemberDTO {
+public class JoinDTO {
+    private String loginId;
+    private String password;
     private String name;
-
     private String email;
 }
