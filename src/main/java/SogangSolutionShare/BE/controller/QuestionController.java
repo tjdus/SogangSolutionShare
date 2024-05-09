@@ -4,6 +4,10 @@ import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import SogangSolutionShare.BE.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +29,12 @@ public class QuestionController {
         questionService.createQuestion(questionDTO);
         return ResponseEntity.ok().build();
     }
+    // 질문 조회 API
+    @GetMapping("/{questionId}")
+    public ResponseEntity<QuestionDTO> getQuestion(@PathVariable("questionId") Long questionId) {
+        QuestionDTO questionDTO = questionService.findQuestion(questionId);
+        return ResponseEntity.ok(questionDTO);
+    }
 
     // 질문 수정 API
     @PatchMapping("/{questionId}")
@@ -41,9 +51,18 @@ public class QuestionController {
     }
 
     // 질문 전체 조회
+    // sort와 pagination 기능 구현
     @GetMapping("/questions")
-    public ResponseEntity<List<QuestionDTO>> getAllQuestions(){
-        List<QuestionDTO> questions = questionService.getAll();
+    public ResponseEntity<Page<QuestionDTO>> getQuestions(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "id,desc") String sort) {
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        Sort.Direction sortDirection = sortParams.length > 1 ? Sort.Direction.fromString(sortParams[1]) : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size,  Sort.by(sortDirection, sortField));
+        Page<QuestionDTO> questions = questionService.findQuestions(pageable);
         return ResponseEntity.ok(questions);
     }
 }
