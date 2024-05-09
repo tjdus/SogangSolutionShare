@@ -2,13 +2,19 @@ package SogangSolutionShare.BE.service;
 
 import SogangSolutionShare.BE.domain.*;
 import SogangSolutionShare.BE.domain.dto.AnswerLikeDTO;
+import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import SogangSolutionShare.BE.domain.dto.QuestionLikeDTO;
 import SogangSolutionShare.BE.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LikeService {
 
     private final QuestionLikeRepository questionLikeRepository;
@@ -22,10 +28,22 @@ public class LikeService {
         Question question = questionRepository.findById(questionLikeDTO.getQuestionId()).orElseThrow(() -> new IllegalArgumentException("해당 질문이 존재하지 않습니다."));
         Member member = memberRepository.findById(questionLikeDTO.getMemberId()).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 
+        question.setLikeCount(question.getLikeCount()+1);
         questionLikeRepository.save(QuestionLike.builder()
                 .question(question)
                 .member(member)
                 .build());
+    }
+
+    public void deleteQuestionLike(QuestionLikeDTO questionLikeDTO) {
+        Question question = questionRepository.findById(questionLikeDTO.getQuestionId()).orElseThrow(() -> new IllegalArgumentException("해당 질문이 존재하지 않습니다."));
+        Member member = memberRepository.findById(questionLikeDTO.getMemberId()).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        QuestionLike questionLike = questionLikeRepository.findByQuestionIdAndMemberId(questionLikeDTO.getQuestionId(), questionLikeDTO.getMemberId());
+        question.setLikeCount(question.getLikeCount()-1);
+        questionLikeRepository.delete(questionLike);
+
+        log.info("QuestionLike deleted: {}", questionLike);
     }
 
     public void createAnswerLike(AnswerLikeDTO answerLikeDTO) {

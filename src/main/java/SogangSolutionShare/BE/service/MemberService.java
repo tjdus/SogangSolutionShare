@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -55,5 +58,12 @@ public class MemberService {
             return null;
         }
         return member;
+    }
+
+    public List<MemberDTO> getMembers(){
+        List<Member> memberList = memberRepository.findAll();
+        return memberList.stream()
+                .map(Member::toDTO)
+                .collect(Collectors.toList());
     }
 }

@@ -1,7 +1,9 @@
 package SogangSolutionShare.BE.controller;
 
+import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.Question;
 import SogangSolutionShare.BE.domain.dto.MemberDTO;
+import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import SogangSolutionShare.BE.service.MemberService;
 import SogangSolutionShare.BE.service.QuestionService;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +28,17 @@ public class MemberController {
 
     // 회원 질문 조회 API
     @GetMapping("/{memberId}/question")
-    public ResponseEntity<List<Question>> getQuestions(@PathVariable("memberId") Long memberId) {
-        List<Question> questions = questionService.getQuestions(memberId);
+    public ResponseEntity<List<QuestionDTO>> getQuestions(@PathVariable("memberId") Long memberId) {
+        List<QuestionDTO> questions = questionService.getQuestions(memberId);
         return ResponseEntity.ok(questions);
+    }
+
+    /* 테스트 용 추후 삭제해야함 */
+    //회원 조회
+    @GetMapping("/members")
+    public ResponseEntity<List<MemberDTO>> getMembers() {
+        List<MemberDTO> members = memberService.getMembers();
+        return ResponseEntity.ok(members);
+
     }
 }

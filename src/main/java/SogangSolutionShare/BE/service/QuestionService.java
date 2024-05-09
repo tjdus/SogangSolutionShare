@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -74,13 +77,38 @@ public class QuestionService {
         log.info("Question updated: {}", question);
     }
 
-    public List<Question> getQuestions(Long memberId) {
+    public List<QuestionDTO> getQuestions(Long memberId) {
         // memberId로 Member 찾아서 없으면 예외처리
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("Member does not exist"));
+        List<Question> questionList = questionRepository.findAllByMemberId(member.getId());
+        return questionList.stream()
+                .map(question -> {
+                    // 각 Question에 대한 Tag 리스트 가져오기
+                    List<QuestionTag> questionTags = questionTagRepository.findByQuestionId(question.getId());
+                    List<String> tagNames = questionTags.stream()
+                            .map(questionTag -> questionTag.getTag().getName()) // 태그 이름 추출
+                            .collect(Collectors.toList());
 
-        // Member 존재하면 Member의 Question들을 반환
-        return questionRepository.findAllByMemberId(member.getId());
+                    // QuestionDTO에 태그 이름 리스트 포함
+                    return question.toDTO(tagNames);
+                })
+                .collect(Collectors.toList());
+    }
 
+    public List<QuestionDTO> getAll(){
+        List<Question> questionList = questionRepository.findAll();
+        return questionList.stream()
+                .map(question -> {
+                    // 각 Question에 대한 Tag 리스트 가져오기
+                    List<QuestionTag> questionTags = questionTagRepository.findByQuestionId(question.getId());
+                    List<String> tagNames = questionTags.stream()
+                            .map(questionTag -> questionTag.getTag().getName()) // 태그 이름 추출
+                            .collect(Collectors.toList());
+
+                    // QuestionDTO에 태그 이름 리스트 포함
+                    return question.toDTO(tagNames);
+                })
+                .collect(Collectors.toList());
     }
 
     public void deleteQuestion(Long questionId) {

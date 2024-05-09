@@ -1,5 +1,6 @@
 package SogangSolutionShare.BE.domain;
 
+import SogangSolutionShare.BE.domain.dto.MemberDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,6 +41,8 @@ public class Member {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-
+    public MemberDTO toDTO() {
+        return new MemberDTO(name, email);
+    }
 
 }
