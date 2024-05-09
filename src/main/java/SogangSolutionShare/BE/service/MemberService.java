@@ -51,7 +51,7 @@ public class MemberService {
     }
 
     public Member login(String loginId, String password) {
-        Member member = memberRepository.findByLoginId(loginId);
+        Member member = memberRepository.findByLoginId(loginId).orElse(null);
         String encodedPassword = (member == null) ? "" : member.getPassword();
 
         if(member == null || !passwordEncoder.matches(password, encodedPassword)) {

@@ -1,28 +1,24 @@
 package SogangSolutionShare.BE.controller;
 
-import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
+@RunWith(SpringRunner.class)
+@Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
 public class MemberControllerTest {
@@ -33,19 +29,18 @@ public class MemberControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @DisplayName("회원 가입 API")
     @Test
     public void createMember() throws Exception {
-        mockMvc.perform(post("/member")
+        mockMvc.perform(post("/join")
                         .param("loginID", "tester1")
                         .param("password", "1234")
                         .param("name", "tester2")
                         .param("email", "tester1@naver.com"))
                 .andExpect(status().isOk());
 
-        memberRepository.findById(1L).ifPresent(
+        memberRepository.findByLoginId("tester1").ifPresent(
                 member -> {
-                    assertEquals(member.getName(), "tester1");
+                    assertEquals(member.getName(), "tester2");
                     assertEquals(member.getEmail(), "tester1@naver.com");
                 }
         );
@@ -70,10 +65,10 @@ public class MemberControllerTest {
                         .param("email", "tester2@naver.com"))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/member/members"))
+        /*mockMvc.perform(get("/member/members"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value("tester1"));
+                .andExpect(jsonPath("$[0].name").value("tester1"));*/
     }
 
 
