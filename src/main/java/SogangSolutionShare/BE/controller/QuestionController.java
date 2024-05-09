@@ -54,15 +54,18 @@ public class QuestionController {
     // sort와 pagination 기능 구현
     @GetMapping("/questions")
     public ResponseEntity<Page<QuestionDTO>> getQuestions(
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "id,desc") String sort) {
-        String[] sortParams = sort.split(",");
-        String sortField = sortParams[0];
-        Sort.Direction sortDirection = sortParams.length > 1 ? Sort.Direction.fromString(sortParams[1]) : Sort.Direction.DESC;
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(name = "sort", required = false, defaultValue = "latest") String orderBy,
+            @RequestParam(name = "category", required = false) Optional<String> category,
+            @RequestParam(name = "tags", required = false) Optional<List<String>> tags) {
+        Sort sort = switch (orderBy) {
+            case "most-liked" -> Sort.by(Sort.Direction.DESC, "likeCount");
+            default -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Pageable pageable = PageRequest.of(page, size,  Sort.by(sortDirection, sortField));
-        Page<QuestionDTO> questions = questionService.findQuestions(pageable);
+        Page<QuestionDTO> questions = questionService.findQuestions(category, tags, pageable);
         return ResponseEntity.ok(questions);
     }
 }

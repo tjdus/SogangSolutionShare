@@ -7,6 +7,10 @@ import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import SogangSolutionShare.BE.service.MemberService;
 import SogangSolutionShare.BE.service.QuestionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +31,13 @@ public class MemberController {
     }
 
     // 회원 질문 조회 API
-    @GetMapping("/{memberId}/question")
-    public ResponseEntity<List<QuestionDTO>> getQuestions(@PathVariable("memberId") Long memberId) {
-        List<QuestionDTO> questions = questionService.findQuestionsByMemberId(memberId);
+    @GetMapping("/{memberId}/questions")
+    public ResponseEntity<Page<QuestionDTO>> getQuestions(
+            @PathVariable("memberId") Long memberId,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<QuestionDTO> questions = questionService.findQuestionsByMemberId(memberId, pageable);
         return ResponseEntity.ok(questions);
     }
 
