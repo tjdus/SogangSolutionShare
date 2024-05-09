@@ -23,6 +23,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.33'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
     testImplementation 'junit:junit:4.13.1'
@@ -42,4 +43,12 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks {
+    jar {
+        enabled = false
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    }
 }
