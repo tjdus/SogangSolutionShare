@@ -25,6 +25,13 @@ public class QuestionService {
     private final TagRepository tagRepository;
     private final QuestionTagRepository questionTagRepository;
 
+    private QuestionDTO convertToDTO(Question question) {
+        List<String> tagNames = questionTagRepository.findByQuestionId(question.getId())
+                .stream()
+                .map(qt -> qt.getTag().getName())
+                .collect(Collectors.toList());
+        return question.toDTO(tagNames);
+    }
 
     public void createQuestion(QuestionDTO questionDTO) {
         Long memberId = questionDTO.getMemberId();
@@ -73,8 +80,7 @@ public class QuestionService {
 
     public QuestionDTO findQuestion(Long questionId) {
         Question question = questionRepository.findOneById(questionId);
-        List<String> tagNames = findTagNames(questionId);
-        return question.toDTO(tagNames);
+        return convertToDTO(question);
     }
 
     public void updateQuestion(Long questionId, QuestionDTO questionDTO) {
@@ -84,30 +90,62 @@ public class QuestionService {
 
         log.info("Question updated: {}", question);
     }
-    private List<String> findTagNames(Long questionId) {
-        List<QuestionTag> questionTags = questionTagRepository.findByQuestionId(questionId);
-        return questionTags.stream()
-                .map(qt -> qt.getTag().getName())
-                .collect(Collectors.toList());
-    }
-    public List<QuestionDTO> findQuestionsByMemberId(Long memberId) {
+
+
+    public Page<QuestionDTO> findQuestionsByMemberId(Long memberId, Pageable pageable) {
         // memberId로 Member 찾아서 없으면 예외처리
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("Member does not exist"));
-        List<Question> questionList = questionRepository.findAllByMemberId(member.getId());
-        return questionList.stream()
-                .map(question -> {
-                    List<String> tagNames = findTagNames(question.getId());
-                    return question.toDTO(tagNames);
-                })
-                .collect(Collectors.toList());
+        Page<Question> questionPage = questionRepository.findAllByMemberId(member.getId(), pageable);
+        return questionPage.map(this::convertToDTO);
     }
 
-    public Page<QuestionDTO> findQuestions(Pageable pageable){
-        Page<Question> questionPage = questionRepository.findAll(pageable);
-        return questionPage.map(question -> {
-                    List<String> tagNames = findTagNames(question.getId());
-                    return question.toDTO(tagNames);
-                });
+    public Page<QuestionDTO> findQuestions(Optional<String> categoryName, Optional<List<String>> tagNames, Pageable pageable){
+        Category category = categoryName
+                .flatMap(categoryRepository::findByName)
+                .orElse(null);
+        List<Tag> tags = tagNames
+                .map(names -> names.stream()
+                        .map(tagRepository::findByName)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()))
+                .orElse(null);
+
+        Page<Question> questionPage;
+        if (category != null && tags != null && !tags.isEmpty()) {
+            questionPage = findQuestionsByCategoryAndTags(category, tags, pageable);
+        } else if (category != null) {
+            questionPage = findQuestionsByCategory(category, pageable);
+        } else if (tags != null && !tags.isEmpty()) {
+            questionPage = findQuestionsByTags(tags, pageable);
+        } else {
+            questionPage = questionRepository.findAll(pageable);
+        }
+        return questionPage.map(this::convertToDTO);
+    }
+
+    private Page<Question> findQuestionsByTags(List<Tag> tags, Pageable pageable) {
+        List<Long> questionIds = questionTagRepository.findByTagIn(tags).stream()
+                .map(QuestionTag::getQuestion)
+                .map(Question::getId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        return questionRepository.findByIdIn(questionIds, pageable);
+    }
+    private Page<Question> findQuestionsByCategory(Category category, Pageable pageable) {
+        return questionRepository.findByCategory(category, pageable);
+    }
+    private Page<Question> findQuestionsByCategoryAndTags(Category category, List<Tag> tags, Pageable pageable){
+        List<QuestionTag> questionTags = questionTagRepository.findByTagIn(tags);
+
+        List<Long> questionIds = questionTags.stream()
+                .map(QuestionTag::getQuestion)
+                .filter(question -> category.equals(question.getCategory())) // 카테고리 필터링
+                .map(Question::getId)
+                .distinct()
+                .collect(Collectors.toList());
+        return questionRepository.findByIdIn(questionIds, pageable);
     }
 
     public void deleteQuestion(Long questionId) {

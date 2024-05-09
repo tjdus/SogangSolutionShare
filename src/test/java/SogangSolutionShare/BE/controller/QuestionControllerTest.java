@@ -107,17 +107,18 @@ public class QuestionControllerTest {
 
     @Test
     public void getQuestionsByMemberId() throws Exception {
-        mockMvc.perform(get("/member/1/question"))
+        mockMvc.perform(get("/member/1/questions"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].tags").isArray())
-                .andExpect(jsonPath("$[0].tags[0]").value("tag1"))
-                .andExpect(jsonPath("$[0].tags[1]").value("tag2"));
+                .andExpect(jsonPath("$.content[1].title").value("title1"))
+                .andExpect(jsonPath("$.content[1].tags").isArray())
+                .andExpect(jsonPath("$.content[1].tags[0]").value("tag1"))
+                .andExpect(jsonPath("$.content[1].tags[1]").value("tag2"));
     }
 
     @Test
     public void testGetQuestionsWithPaging() throws Exception {
         mockMvc.perform(get("/question/questions")
-                        .param("page", "1")
+                        .param("page", "2")
                         .param("size", "1"))
                 .andExpect(status().isOk())  // HTTP 200 상태 코드 확인
                 .andExpect(jsonPath("$.number").value(1))
@@ -125,27 +126,28 @@ public class QuestionControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].tags[0]").value("tag1"));
         mockMvc.perform(get("/question/questions")
-                        .param("page", "0")
+                        .param("page", "1")
                         .param("size", "2")
-                        .param("sort", "likeCount"))
+                        .param("orderBy", "most-liked"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("title2"))
                 .andExpect(jsonPath("$.content[1].title").value("title1"));
 
+
         mockMvc.perform(get("/question/questions")
-                        .param("page", "0")
+                        .param("page", "1")
                         .param("size", "2")
-                        .param("sort", "likeCount,asc"))
+                        .param("orderBy", "latest"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("title1"))
-                .andExpect(jsonPath("$.content[1].title").value("title2"));
-        mockMvc.perform(get("/question/questions")
-                        .param("page", "0")
-                        .param("size", "2")
-                        .param("sort", "createdAt,asc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("title1"))
-                .andExpect(jsonPath("$.content[1].title").value("title2"));
+                .andExpect(jsonPath("$.content[0].title").value("title2"))
+                .andExpect(jsonPath("$.content[1].title").value("title1"));
     }
 
+    @Test
+    public void testGetQuestionsByCategory() throws Exception {
+        mockMvc.perform(get("/category/testCategory/questions")
+                .param("orderBy", "most-liked"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].title").value("title2"));
+    }
 }
