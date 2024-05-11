@@ -26,8 +26,20 @@ public class MemberController {
 
     // 회원 정보 수정 API
     @PatchMapping("/{memberId}")
-    public void updateMember(@PathVariable("memberId") Long memberId, MemberDTO memberDTO) {
-        memberService.updateMember(memberId, memberDTO);
+    public ResponseEntity<String> updateMember(@PathVariable("memberId") Long memberId, MemberDTO memberDTO) {
+        String message = memberService.updateMember(memberId, memberDTO);
+
+        if(message.equals("해당하는 회원이 존재하지 않습니다.")) {
+            return ResponseEntity.badRequest().body(message);
+        }
+        return ResponseEntity.ok(message);
+    }
+
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<Void> deleteMember(@PathVariable("memberId") Long memberId) {
+        memberService.deleteMember(memberId);
+
+        return ResponseEntity.ok().build();
     }
 
     // 회원 질문 조회 API
@@ -41,7 +53,6 @@ public class MemberController {
         return ResponseEntity.ok(questions);
     }
 
-    /* 테스트 용 추후 삭제해야함 */
     //회원 조회
     @GetMapping("/members")
     public ResponseEntity<List<MemberDTO>> getMembers() {

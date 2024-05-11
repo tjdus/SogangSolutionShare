@@ -39,6 +39,10 @@ dependencies {
 	testImplementation 'io.projectreactor:reactor-test'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    implementation 'org.springframework.boot:spring-boot-starter-mail' // Email
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' // Thymeleaf
+
 }
 
 tasks.named('test') {
