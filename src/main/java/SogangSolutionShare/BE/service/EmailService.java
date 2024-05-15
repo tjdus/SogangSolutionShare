@@ -49,6 +49,9 @@ public class EmailService {
         if(temp == null || !temp.getAuthorizationNumber().equals(authorizationNumber)) {
             return "인증번호가 일치하지 않습니다.";
         }
+        else {
+            tempRepository.delete(temp);
+        }
         return "인증에 성공하셨습니다.";
     }
 }

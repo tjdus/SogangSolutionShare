@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
+                .allowedOrigins("http://localhost:3000", "http://localhost:3001")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true)
                 .exposedHeaders("*");
@@ -22,6 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginCheckInterceptor())
                 .addPathPatterns("/**")
-                .excludePathPatterns("/join", "/login", "/logout", "/email/**");
+                .excludePathPatterns("/join", "/login", "/logout", "/email/**", "/oauth/**");
     }
 }

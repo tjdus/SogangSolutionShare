@@ -64,4 +64,11 @@ public class LoginController {
         // 200 OK
         return ResponseEntity.ok(new MemberResponseDTO(member));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        session.invalidate();
+        return ResponseEntity.ok("로그아웃 되었습니다.");
+    }
 }
