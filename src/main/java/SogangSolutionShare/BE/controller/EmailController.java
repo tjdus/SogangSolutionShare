@@ -1,6 +1,7 @@
 package SogangSolutionShare.BE.controller;
 
-import SogangSolutionShare.BE.domain.dto.EmailDTO;
+import SogangSolutionShare.BE.domain.dto.EmailCheckDTO;
+import SogangSolutionShare.BE.domain.dto.EmailRequestDTO;
 import SogangSolutionShare.BE.service.EmailService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +21,14 @@ public class EmailController {
     private final EmailService emailService;
 
     @PostMapping("/send")
-    public void sendEmail(@RequestBody EmailDTO emailDTO) throws MessagingException {
-        log.info("Email: {}", emailDTO.getEmail());
+    public void sendEmail(@RequestBody EmailRequestDTO emailRequestDTO) throws MessagingException {
+        log.info("Email: {}", emailRequestDTO.getEmail());
         // 이메일 전송 API
-        emailService.sendAuthorizationEmail(emailDTO.getEmail());
+        emailService.sendAuthorizationEmail(emailRequestDTO.getEmail());
     }
 
     @PostMapping("/check")
-    public ResponseEntity<String> checkEmail(@RequestBody EmailDTO emailDTO) {
+    public ResponseEntity<String> checkEmail(@RequestBody EmailCheckDTO emailDTO) {
         // 이메일 인증 확인 API
         String msg = emailService.checkEmail(emailDTO.getEmail(), emailDTO.getAuthorizationNumber());
 
