@@ -28,15 +28,17 @@ public class LoginControllerTest {
         session = new MockHttpSession();
         // 회원가입
         mockMvc.perform(post("/join")
-                        .param("loginID", "tester1")
+                        .contentType("application/form-data")
+                        .param("loginId", "tester1")
                         .param("password", "tester1")
-                        .param("name", "전용본")
-                        .param("email", "bon0057@naver.com"))
-                .andExpect(status().isOk());
+                        .param("name", "tester1")
+                        .param("email", "tester1@naver.com"))
+                .andExpect(status().isCreated());
         // 로그인
         mockMvc.perform(post("/login")
                         .session(session)
-                        .param("loginID", "tester1")
+                        .contentType("application/form-data")
+                        .param("loginId", "tester1")
                         .param("password", "tester1"))
                 .andExpect(status().isOk());
 

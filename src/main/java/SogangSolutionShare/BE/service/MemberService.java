@@ -37,7 +37,7 @@ public class MemberService {
         // Member 생성하고 저장
         Member createdMember = Member.builder()
                 .loginId(joinDTO.getLoginId())
-                .password(passwordEncoder.encode(joinDTO.getPassword()))
+                .password(joinDTO.getPassword())
                 .email(joinDTO.getEmail())
                 .name(joinDTO.getName())
                 .build();
@@ -52,10 +52,9 @@ public class MemberService {
 
     public Member login(String loginId, String password) {
         Member member = memberRepository.findByLoginId(loginId).orElse(null);
-        String encodedPassword = (member == null) ? "" : member.getPassword();
 
         // 로그인 실패
-        if(member == null || !passwordEncoder.matches(password, encodedPassword)) {
+        if(member == null || !password.equals(member.getPassword())) {
             return null;
         }
         // 로그인 성공
@@ -89,4 +88,24 @@ public class MemberService {
     }
 
 
+    public MemberDTO getMember(Long id) {
+        Optional<Member> member = memberRepository.findById(id);
+
+        return member.map(Member::toDTO).orElse(null);
+
+    }
+
+    public String updatePassword(Long id, String password) {
+        Optional<Member> member = memberRepository.findById(id);
+
+        if(member.isEmpty()) {
+            return "해당하는 회원이 존재하지 않습니다.";
+        }
+
+        member.get().setPassword(password);
+
+        log.info("Member updated: {}", member);
+
+        return "비밀번호 수정에 성공하셨습니다.";
+    }
 }
