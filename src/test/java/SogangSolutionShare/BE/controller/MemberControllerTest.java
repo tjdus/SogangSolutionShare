@@ -32,7 +32,7 @@ public class MemberControllerTest {
     @Test
     public void createMember() throws Exception {
         mockMvc.perform(post("/join")
-                        .param("loginID", "tester1")
+                        .param("loginId", "tester1")
                         .param("password", "1234")
                         .param("name", "tester2")
                         .param("email", "tester1@naver.com"))
