@@ -46,25 +46,74 @@ public class QuestionControllerTest {
         categoryRepository.deleteAll();
         memberRepository.deleteAll();
 
-        Member member = new Member();
-        member.setName("testMember");
-        memberRepository.save(member);
-        Category category = new Category();
-        category.setName("testCategory");
-        categoryRepository.save(category);
+        Member member1 = new Member();
+        member1.setName("testMember");
+        memberRepository.save(member1);
+
+        Member member2 = new Member();
+        member2.setName("testMember2");
+        memberRepository.save(member2);
+
+        Category category1 = new Category();
+        category1.setName("testCategory1");
+        categoryRepository.save(category1);
+
+        Category category2 = new Category();
+        category2.setName("testCategory2");
+        categoryRepository.save(category2);
+
         Tag tag1 = tagRepository.save(new Tag("tag1"));
         Tag tag2 = tagRepository.save(new Tag("tag2"));
+        Tag tag3 = tagRepository.save(new Tag("tag3"));
 
-        Question question1 = new Question(null, member, category, "title1", "content1", null, null, 5L);
-        Question question2 = new Question(null, member, category, "title2", "content2", null, null, 10L);
-        questionRepository.saveAll(Arrays.asList(question1, question2));
+        Question question1 = new Question(null, member1, category1, "title1", "content1", null, null, 5L);
+        Question question2 = new Question(null, member1, category1, "title2", "content2", null, null, 10L);
+        Question question3 = new Question(null, member2, category2, "title3", "content3", null, null, 7L);
+
+        questionRepository.saveAll(Arrays.asList(question1, question2, question3));
 
         QuestionTag questionTag1 = new QuestionTag(null, question1, tag1, null);
         QuestionTag questionTag2 = new QuestionTag(null, question1, tag2, null);
-        questionTagRepository.saveAll(Arrays.asList(questionTag1, questionTag2));
+
+        QuestionTag questionTag3 = new QuestionTag(null, question2, tag1, null);
+        QuestionTag questionTag4 = new QuestionTag(null, question2, tag3, null);
+
+        QuestionTag questionTag5 = new QuestionTag(null, question3, tag2, null);
+
+        questionTagRepository.saveAll(Arrays.asList(questionTag1, questionTag2, questionTag3, questionTag4, questionTag5));
 
         session = new MockHttpSession();
-        session.setAttribute("loginMember", member);
+        session.setAttribute("loginMember", member1);
+
+        /*
+        {
+          "memberId": 1,
+          "categoryName": "testCategory1",
+          "title": "title1",
+          "content": "content1",
+          "likeCount": 5,
+          "tags": ["tag1", "tag2"]
+        }
+        {
+          "memberId": 1,
+          "categoryName": "testCategory1",
+          "title": "title2",
+          "content": "content2",
+          "likeCount": 5,
+          "tags": ["tag1", "tag3"]
+        }
+        */
+
+        /*
+        {
+          "memberId": 2,
+          "categoryName": "testCategory2",
+          "title": "title3",
+          "content": "content3",
+          "likeCount": 7,
+          "tags": ["tag2"]
+        }
+        */
     }
 //    @Test
 //    public void createQuestion() throws Exception {
@@ -84,77 +133,124 @@ public class QuestionControllerTest {
     @Test
     public void deleteQuestion() {
     }
+    @Test
+    public void getQuestionsByMemberId() throws Exception {
+        mockMvc.perform(get("/member/1/questions")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].title").value("title2"))
+                .andExpect(jsonPath("$.content[1].title").value("title1"));
+    }
 
     @Test
     public void getQuestion() throws Exception {
-        /*mockMvc.perform(get("/question/1")
+        mockMvc.perform(get("/question/1")
                 .session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("title1"))
-                .andExpect(jsonPath("$.tags[0]").value("tag1"));*/
+                .andExpect(jsonPath("$.categoryName").value("testCategory1"))
+                .andExpect(jsonPath("$.tags[0]").value("tag1"));
     }
     @Test
     public void getQuestions() throws Exception {
-        mockMvc.perform(get("/question/questions")
-                .session(session))
+        //최신순
+        mockMvc.perform(get("/questions")
+                        .session(session))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content.length()").value(3))
+                .andExpect(jsonPath("$.content[0].title").value("title3"))
+                .andExpect(jsonPath("$.content[1].title").value("title2"))
+                .andExpect(jsonPath("$.content[2].title").value("title1"));
+
+
+        //좋아요 순
+        mockMvc.perform(get("/questions")
+                        .param("orderBy", "most-liked")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(3))
                 .andExpect(jsonPath("$.content[0].title").value("title2"))
-                .andExpect(jsonPath("$.content[1].title").value("title1"))
+                .andExpect(jsonPath("$.content[1].title").value("title3"))
+                .andExpect(jsonPath("$.content[2].title").value("title1"))
                 .andExpect(jsonPath("$.content[0].likeCount").value(10))
-                .andExpect(jsonPath("$.content[1].likeCount").value(5));
-
-
+                .andExpect(jsonPath("$.content[1].likeCount").value(7))
+                .andExpect(jsonPath("$.content[2].likeCount").value(5));
     }
 
     @Test
-    public void getQuestionsByMemberId() throws Exception {
-        /*mockMvc.perform(get("/member/1/questions")
-                .session(session))
+    public void getQuestionsWithPaging() throws Exception {
+        // 페이지 사이즈 1
+        // 1 페이지
+        mockMvc.perform(get("/questions")
+                        .param("page", "1")
+                        .param("size", "1")
+                        .session(session))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[1].title").value("title1"))
-                .andExpect(jsonPath("$.content[1].tags").isArray())
-                .andExpect(jsonPath("$.content[1].tags[0]").value("tag1"))
-                .andExpect(jsonPath("$.content[1].tags[1]").value("tag2"));*/
-    }
-
-    @Test
-    public void testGetQuestionsWithPaging() throws Exception {
-        mockMvc.perform(get("/question/questions")
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("title3"));
+        // 2 페이지
+        mockMvc.perform(get("/questions")
                         .param("page", "2")
                         .param("size", "1")
                         .session(session))
-                .andExpect(status().isOk())  // HTTP 200 상태 코드 확인
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.number").value(1))
                 .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.content.length()").value(1))
-                .andExpect(jsonPath("$.content[0].tags[0]").value("tag1"));
-        mockMvc.perform(get("/question/questions")
+                .andExpect(jsonPath("$.content[0].title").value("title2"));
+
+        // 페이지 사이즈 2
+        // 좋아요순
+        // 1 페이지
+        mockMvc.perform(get("/questions")
                         .param("page", "1")
                         .param("size", "2")
                         .param("orderBy", "most-liked")
                         .session(session))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.content[0].title").value("title2"))
-                .andExpect(jsonPath("$.content[1].title").value("title1"));
-
-
-        mockMvc.perform(get("/question/questions")
-                        .param("page", "1")
+                .andExpect(jsonPath("$.content[1].title").value("title3"));
+        // 2 페이지
+        mockMvc.perform(get("/questions")
+                        .param("page", "2")
                         .param("size", "2")
-                        .param("orderBy", "latest")
                         .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.number").value(1))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.content[0].title").value("title1"));
+    }
+
+    @Test
+    public void searchQuestionsByQuery() throws Exception {
+        mockMvc.perform(get("/search")
+                .param("q", "title1")
+                .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].title").value("title1"));
+    }
+
+    @Test
+    public void searchQuestionsByTags() throws Exception {
+        mockMvc.perform(get("/search")
+                .param("q", "tag1")
+                .param("type", "tag")
+                .session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("title2"))
                 .andExpect(jsonPath("$.content[1].title").value("title1"));
     }
-
     @Test
-    public void testGetQuestionsByCategory() throws Exception {
-        mockMvc.perform(get("/category/testCategory/questions")
-                .param("orderBy", "most-liked")
-                .session(session))
+    public void searchQuestionsByCategories() throws Exception {
+        mockMvc.perform(get("/search")
+                        .param("q", "testCategory1,testCategory2")
+                        .param("type", "category")
+                        .session(session))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("title2"));
+                .andExpect(jsonPath("$.content[0].title").value("title3"))
+                .andExpect(jsonPath("$.content[1].title").value("title2"))
+                .andExpect(jsonPath("$.content[2].title").value("title1"));
     }
 }
