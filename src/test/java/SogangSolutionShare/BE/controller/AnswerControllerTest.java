@@ -34,4 +34,9 @@ public class AnswerControllerTest {
     @Test
     public void updateAnswer() {
     }
+
+    @Test
+    public void deleteAnswer(){
+
+    }
 }

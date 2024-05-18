@@ -32,4 +32,12 @@ public class AnswerController {
 
         return ResponseEntity.ok().build();
     }
+
+    // 답변 삭제 API
+    @DeleteMapping("/{answerId}")
+    public ResponseEntity<Void> deleteAnswer(@PathVariable("answerId") Long answerId) {
+        answerService.deleteAnswer(answerId);
+        return ResponseEntity.ok().build();
+    }
+
 }
