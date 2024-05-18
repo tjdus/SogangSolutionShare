@@ -50,4 +50,14 @@ public class AnswerService {
 
             log.info("Answer updated: {}", answer);
     }
+
+    public void deleteAnswer(Long answerId) {
+        // answerId로 Answer 찾아서 없으면 예외처리
+        Answer answer = answerRepository.findById(answerId).orElseThrow(() -> new IllegalArgumentException("Answer does not exist"));
+
+        // Answer 삭제
+        answerRepository.delete(answer);
+
+        log.info("Answer deleted: {}", answerId);
+    }
 }
