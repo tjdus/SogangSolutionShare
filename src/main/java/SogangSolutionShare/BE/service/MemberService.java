@@ -6,8 +6,8 @@ import SogangSolutionShare.BE.domain.dto.MemberDTO;
 import SogangSolutionShare.BE.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +20,11 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    private final PasswordEncoder passwordEncoder;
 
     /*
      * 회원가입 비즈니스 로직
      */
+    @Transactional
     public String createMember(JoinDTO joinDTO) {
         // 같은 로그인 아이디 혹은 같은 이메일을 가진 Member 이미 존재하면 예외처리
         if(memberRepository.findByEmail(joinDTO.getLoginId()).isPresent()) {
@@ -61,6 +61,7 @@ public class MemberService {
         return member;
     }
 
+    @Transactional
     public String updateMember(Long memberId, MemberDTO memberDTO) {
         Optional<Member> member = memberRepository.findById(memberId);
 

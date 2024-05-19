@@ -2,6 +2,7 @@ package SogangSolutionShare.BE.controller;
 
 import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
+import SogangSolutionShare.BE.service.CategoryService;
 import SogangSolutionShare.BE.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,14 @@ import java.util.Optional;
 public class CategoryController {
 
     private final QuestionService questionService;
+    private final CategoryService categoryService;
+
+    @PostMapping
+    public ResponseEntity<Void> createCategory(@RequestParam("name") String name) {
+        categoryService.createCategory(name);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{categoryId}/questions")
     public ResponseEntity<Page<QuestionDTO>> getQuestionsByCategory(
             @RequestParam(name = "page", defaultValue = "1") int page,
