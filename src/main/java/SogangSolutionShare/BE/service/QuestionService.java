@@ -1,17 +1,19 @@
 package SogangSolutionShare.BE.service;
 
 import SogangSolutionShare.BE.domain.*;
+import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
+import SogangSolutionShare.BE.domain.dto.SearchCriteria;
 import SogangSolutionShare.BE.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +33,20 @@ public class QuestionService {
                 .map(qt -> qt.getTag().getName())
                 .collect(Collectors.toList());
         return question.toDTO(tagNames);
+    }
+
+    private Pageable createPageable(Integer page, Integer size, String orderBy){
+        Sort sort;
+        switch (orderBy) {
+            case "most-liked":
+                sort = Sort.by("likeCount").descending();
+                break;
+            case "latest":
+            default:
+                sort = Sort.by("createdAt").descending();
+                break;
+        }
+        return PageRequest.of(page, size, sort);
     }
 
     public void createQuestion(QuestionDTO questionDTO) {
@@ -78,7 +94,7 @@ public class QuestionService {
 
     }
 
-    public QuestionDTO findQuestion(Long questionId) {
+    public QuestionDTO findQuestionById(Long questionId) {
         Question question = questionRepository.findOneById(questionId);
         return convertToDTO(question);
     }
@@ -98,29 +114,25 @@ public class QuestionService {
         Page<Question> questionPage = questionRepository.findAllByMemberId(member.getId(), pageable);
         return questionPage.map(this::convertToDTO);
     }
+    public Page<QuestionDTO> findQuestionsByCategoryId(Criteria criteria, Long categoryId) {
+        Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
+        Category category = categoryRepository.findById(categoryId).orElse(null);
 
-    public Page<QuestionDTO> findQuestions(Optional<String> categoryName, Optional<List<String>> tagNames, Pageable pageable){
-        Category category = categoryName
-                .flatMap(categoryRepository::findByName)
-                .orElse(null);
-        List<Tag> tags = tagNames
-                .map(names -> names.stream()
-                        .map(tagRepository::findByName)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList()))
-                .orElse(null);
+        Page<Question> questionPage = questionRepository.findByCategory(category, pageable);
+        return questionPage.map(this::convertToDTO);
+    }
+    public Page<QuestionDTO> findQuestionsByTagId(Criteria criteria, Long tagId) {
+        Pageable pageable =createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
+        Tag tag = tagRepository.findById(tagId).orElse(null);
 
-        Page<Question> questionPage;
-        if (category != null && tags != null && !tags.isEmpty()) {
-            questionPage = findQuestionsByCategoryAndTags(category, tags, pageable);
-        } else if (category != null) {
-            questionPage = findQuestionsByCategory(category, pageable);
-        } else if (tags != null && !tags.isEmpty()) {
-            questionPage = findQuestionsByTags(tags, pageable);
-        } else {
-            questionPage = questionRepository.findAll(pageable);
-        }
+        Page<Question> questionPage = findQuestionsByTags(List.of(tag), pageable);
+        return questionPage.map(this::convertToDTO);
+    }
+
+    public Page<QuestionDTO> findQuestions(Criteria criteria){
+        Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
+
+        Page<Question> questionPage = questionRepository.findAll(pageable);
         return questionPage.map(this::convertToDTO);
     }
 
@@ -133,8 +145,8 @@ public class QuestionService {
 
         return questionRepository.findByIdIn(questionIds, pageable);
     }
-    private Page<Question> findQuestionsByCategory(Category category, Pageable pageable) {
-        return questionRepository.findByCategory(category, pageable);
+    private Page<Question> findQuestionsByCategories(List<Category> categories, Pageable pageable) {
+        return questionRepository.findByCategoryIn(categories, pageable);
     }
     private Page<Question> findQuestionsByCategoryAndTags(Category category, List<Tag> tags, Pageable pageable){
         List<QuestionTag> questionTags = questionTagRepository.findByTagIn(tags);
@@ -153,5 +165,51 @@ public class QuestionService {
         questionRepository.delete(question);
 
         log.info("Question deleted: {}", question);
+    }
+
+
+    private Page<QuestionDTO> searchByTitlesAndContents(String query, Pageable pageable) {
+        Page<Question> questionPage = questionRepository.findByTitlesAndContents(query, pageable);
+        return questionPage.map(this::convertToDTO);
+    }
+    private Page<QuestionDTO> searchByTags(String tagString, Pageable pageable) {
+        List<String> tagNames = tagString != null ? Arrays.asList(tagString.split(",")) : List.of();
+        List<Tag> tags = getTagsByNames(tagNames);
+        Page<Question> questionPage = findQuestionsByTags(tags, pageable);
+        return questionPage.map(this::convertToDTO);
+
+    }
+
+    private List<Tag> getTagsByNames(List<String> tagNames) {
+        return tagNames.stream()
+                .map(tagRepository::findByName)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    private Page<QuestionDTO> searchByCategories(String categoryString, Pageable pageable) {
+        List<String> categoryNames = categoryString != null ? Arrays.asList(categoryString.split(",")) : List.of();
+        List<Category> categories = getCategoriesByNames(categoryNames);
+        Page<Question> questionPage = findQuestionsByCategories(categories, pageable);
+        return questionPage.map(this::convertToDTO);
+    }
+
+    private List<Category> getCategoriesByNames(List<String> categoryNames) {
+        return categoryNames.stream()
+                .map(categoryRepository::findByName)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    public Page<QuestionDTO> searchQuestions(SearchCriteria searchCriteria) {
+        String searchType = searchCriteria.getType();
+        Pageable pageable = createPageable(searchCriteria.getPage(), searchCriteria.getSize(), searchCriteria.getOrderBy());
+        return switch (searchType) {
+            case "tag" -> searchByTags(searchCriteria.getQ(), pageable);
+            case "category" -> searchByCategories(searchCriteria.getQ(), pageable);
+            default -> searchByTitlesAndContents(searchCriteria.getQ(), pageable);
+        };
     }
 }
