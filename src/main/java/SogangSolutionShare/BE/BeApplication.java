@@ -30,27 +30,5 @@ public class BeApplication {
 		SpringApplication.run(BeApplication.class, args);
 	}
 
-    @EventListener(ApplicationReadyEvent.class)
-    @Transactional
-    public void init() {
-//        Member member = new Member();
-//        member.setName("tester1");
-//        member.setEmail("tester1@naver.com");
-//
-//        memberRepository.save(member);
-//
-//        Category category = new Category();
-//        category.setName("미적분학");
-//        categoryRepository.save(category);
-//
-//
-//        Question question = new Question();
-//        question.setMember(member);
-//        question.setCategory(category);
-//        question.setTitle("미적분학 문제");
-//        question.setContent("미적분학 문제입니다.");
-//        questionRepository.save(question);
-
-    }
 
 }

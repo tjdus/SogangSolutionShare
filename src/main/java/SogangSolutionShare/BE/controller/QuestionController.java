@@ -3,6 +3,9 @@ package SogangSolutionShare.BE.controller;
 import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import SogangSolutionShare.BE.service.QuestionService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,8 +34,33 @@ public class QuestionController {
     }
     // 질문 조회 API
     @GetMapping("/question/{questionId}")
-    public ResponseEntity<QuestionDTO> getQuestion(@PathVariable("questionId") Long questionId) {
+    public ResponseEntity<QuestionDTO> getQuestion(@PathVariable("questionId") Long questionId, HttpServletRequest request, HttpServletResponse response) {
         QuestionDTO questionDTO = questionService.findQuestionById(questionId);
+
+        Cookie viewCookie = null;
+        Cookie[] cookies = request.getCookies();
+
+        for(Cookie cookie : cookies) {
+            if(cookie.getName().equals("View")) {
+                viewCookie = cookie;
+            }
+        }
+
+        if(viewCookie == null) {
+            questionService.updateViewCount(questionId);
+            Cookie newCookie = new Cookie("View", "|" + questionId + "|");
+            response.addCookie(newCookie);
+        } else {
+            String value = viewCookie.getValue();
+            if(!value.contains("|" + questionId + "|")) {
+                questionService.updateViewCount(questionId);
+                value += "|" + questionId + "|";
+                viewCookie.setValue(value);
+                response.addCookie(viewCookie);
+            }
+        }
+
+
         return ResponseEntity.ok(questionDTO);
     }
 

@@ -12,7 +12,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -76,6 +78,8 @@ public class QuestionService {
                         .category(category)
                         .title(questionDTO.getTitle())
                         .content(questionDTO.getContent())
+                        .likeCount(0L)
+                        .viewCount(0L)
                         .build();
 
         log.info("Question created: {}", createdQuestion);
@@ -103,6 +107,7 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new IllegalArgumentException("Question does not exist"));
         question.setTitle(questionDTO.getTitle());
         question.setContent(questionDTO.getContent());
+        question.setUpdatedAt(LocalDateTime.now());
 
         log.info("Question updated: {}", question);
     }
@@ -212,4 +217,12 @@ public class QuestionService {
             default -> searchByTitlesAndContents(searchCriteria.getQ(), pageable);
         };
     }
+
+    @Transactional
+    public void updateViewCount(Long questionId) {
+        Question question = questionRepository.findById(questionId).orElseThrow(() -> new IllegalArgumentException("Question does not exist"));
+        question.addViewCount();
+    }
+
+
 }

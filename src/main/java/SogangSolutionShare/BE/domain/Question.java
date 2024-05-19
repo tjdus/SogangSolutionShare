@@ -41,10 +41,11 @@ public class Question {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
+    @CreatedDate
     private LocalDateTime updatedAt;
 
     private Long likeCount = 0L;
+    private Long viewCount = 0L;
 
     @Override
     public String toString() {
@@ -58,5 +59,9 @@ public class Question {
     }
     public QuestionDTO toDTO(List<String> tags) {
         return new QuestionDTO(member.getId(), category.getName(), title, content, likeCount, tags);
+    }
+
+    public void addViewCount() {
+        this.viewCount++;
     }
 }
