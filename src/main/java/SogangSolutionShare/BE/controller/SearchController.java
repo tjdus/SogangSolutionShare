@@ -22,7 +22,7 @@ public class SearchController {
             @RequestParam(name = "size",defaultValue = "10") Integer size,
             @RequestParam(name = "orderBy", defaultValue = "latest") String orderBy,
             @RequestParam(name = "q", required = false) String q,
-            @RequestParam(name = "type", defaultValue = "query") String type){
+            @RequestParam(name = "type", defaultValue = "title") String type){
 
         SearchCriteria searchCriteria = new SearchCriteria(page-1, size, orderBy, q, type);
         Page<QuestionDTO> questions = questionService.searchQuestions(searchCriteria);

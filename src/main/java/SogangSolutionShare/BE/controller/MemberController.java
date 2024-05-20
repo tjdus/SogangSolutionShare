@@ -3,6 +3,7 @@ package SogangSolutionShare.BE.controller;
 import SogangSolutionShare.BE.annotation.Login;
 import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.Question;
+import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.domain.dto.MemberDTO;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import SogangSolutionShare.BE.service.MemberService;
@@ -71,8 +72,9 @@ public class MemberController {
             @Login Member loginMember,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<QuestionDTO> questions = questionService.findQuestionsByMemberId(loginMember.getId(), pageable);
+        String orderBy = "latest";
+        Criteria criteria = new Criteria(page - 1, size, orderBy);
+        Page<QuestionDTO> questions = questionService.findQuestionsByMemberId(loginMember.getId(), criteria);
         return ResponseEntity.ok(questions);
     }
 

@@ -17,7 +17,7 @@ public class TagController {
 
     private final QuestionService questionService;
     @GetMapping("/tag/{tagId}/questions")
-    public ResponseEntity<Page<QuestionDTO>> getQuestionsByCategory(
+    public ResponseEntity<Page<QuestionDTO>> getQuestionsByTagId(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size",defaultValue = "10") int size,
             @RequestParam(name = "orderBy", defaultValue = "latest") String orderBy,
@@ -28,5 +28,17 @@ public class TagController {
         Page<QuestionDTO> questions = questionService.findQuestionsByTagId(criteria, tagId);
         return ResponseEntity.ok(questions);
 
+    }
+
+    @GetMapping("/tagged/{tags}")
+    public ResponseEntity<Page<QuestionDTO>> getQuestionsByTags(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size",defaultValue = "10") int size,
+            @RequestParam(name = "orderBy", defaultValue = "latest") String orderBy,
+            @PathVariable("tags") String tags) {
+
+        Criteria criteria = new Criteria(page - 1, size, orderBy);
+        Page<QuestionDTO> questions = questionService.findQuestionsByTags(criteria, tags);
+        return ResponseEntity.ok(questions);
     }
 }
