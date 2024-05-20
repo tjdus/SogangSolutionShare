@@ -54,6 +54,7 @@ public class Question {
     private Long answerCount = 0L;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<QuestionTag> questionTags = new ArrayList<>();
     @Override
     public String toString() {

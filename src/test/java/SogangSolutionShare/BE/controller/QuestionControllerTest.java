@@ -32,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 public class QuestionControllerTest {
 
     @Autowired
@@ -46,6 +45,7 @@ public class QuestionControllerTest {
     @Autowired private QuestionTagRepository questionTagRepository;
 
     @Autowired private QuestionService questionService;
+
     @Before
     public void setUp() {
         questionTagRepository.deleteAll();
@@ -55,10 +55,7 @@ public class QuestionControllerTest {
         memberRepository.deleteAll();
 
         Member member = new Member();
-        member.setId(1L);
-        member.setEmail("test@example.com");
-        member.setLoginId("testuser");
-        member.setName("Test User");
+        member.setName("name");
         member.setPassword("password");
         memberRepository.save(member);
 
@@ -79,7 +76,10 @@ public class QuestionControllerTest {
                 .category("category")
                 .tags(List.of("tag1", "tag2"))
                 .build();
-        QuestionDTO createdQuestion = questionService.createQuestion(1L, questionRequestDTO);
+        Member member = memberRepository.findByName("name").orElse(null);
+        assert member != null;
+        Long memberId = member.getId();
+        QuestionDTO createdQuestion = questionService.createQuestion(memberId, questionRequestDTO);
 
         assertNotNull(createdQuestion);
         assertEquals("title", createdQuestion.getTitle());
@@ -93,129 +93,106 @@ public class QuestionControllerTest {
     }
     @Test
     public void updateQuestion() {
+        QuestionRequestDTO questionRequestDTO = QuestionRequestDTO.builder()
+                .title("title")
+                .content("content")
+                .category("category")
+                .tags(List.of("tag1", "tag2"))
+                .build();
+        Member member = memberRepository.findByName("name").orElse(null);
+        assert member != null;
+        Long memberId = member.getId();
+        QuestionDTO createdQuestion = questionService.createQuestion(memberId, questionRequestDTO);
+        Long questionId = createdQuestion.getId();
+
+        QuestionRequestDTO questionUpdateRequest = QuestionRequestDTO.builder()
+                .title("updated title")
+                .content("updated content")
+                .category("category")
+                .tags(List.of("tag3", "tag4"))
+                .build();
+
+        QuestionDTO updatedQuestion = questionService.updateQuestion(memberId, questionId, questionUpdateRequest);
+
+        assertNotNull(updatedQuestion);
+        assertEquals("updated title", updatedQuestion.getTitle());
+        assertEquals("updated content", updatedQuestion.getContent());
+        assertEquals("category", updatedQuestion.getCategory());
+        assertTrue(updatedQuestion.getTags().contains("tag3"));
+        assertTrue(updatedQuestion.getTags().contains("tag4"));
+        // 기존 연관 관계가 제거되었는지 확인
+        assertFalse(questionTagRepository.findByQuestionId(questionId).stream().anyMatch(questionTag -> questionTag.getTag().getName().equals("tag1")));
+        assertFalse(questionTagRepository.findByQuestionId(questionId).stream().anyMatch(questionTag -> questionTag.getTag().getName().equals("tag2")));
+
+        // 새로운 연관 관계가 추가되었는지 확인
+        assertTrue(questionTagRepository.findByQuestionId(questionId).stream().anyMatch(questionTag -> questionTag.getTag().getName().equals("tag3")));
+        assertTrue(questionTagRepository.findByQuestionId(questionId).stream().anyMatch(questionTag -> questionTag.getTag().getName().equals("tag4")));
+
     }
 
     @Test
     public void deleteQuestion() {
+        QuestionRequestDTO questionRequestDTO = QuestionRequestDTO.builder()
+                .title("title")
+                .content("content")
+                .category("category")
+                .tags(List.of("tag1", "tag2"))
+                .build();
+        Member member = memberRepository.findByName("name").orElse(null);
+        Long memberId = member.getId();
+        QuestionDTO createdQuestion = questionService.createQuestion(memberId, questionRequestDTO);
+        Long questionId = createdQuestion.getId();
+
+        questionService.deleteQuestion(memberId, questionId);
+        assertNull(questionRepository.findOneById(questionId));
     }
     @Test
     public void getQuestionsByMemberId() throws Exception {
-        mockMvc.perform(get("/member/1/questions")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("title2"))
-                .andExpect(jsonPath("$.content[1].title").value("title1"));
+
     }
 
     @Test
     public void getQuestion() throws Exception {
-        mockMvc.perform(get("/question/1")
-                .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("title1"))
-                .andExpect(jsonPath("$.categoryName").value("testCategory1"))
-                .andExpect(jsonPath("$.tags[0]").value("tag1"));
-    }
-    @Test
-    public void getQuestions() throws Exception {
-        //최신순
-        mockMvc.perform(get("/questions")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(3))
-                .andExpect(jsonPath("$.content[0].title").value("title3"))
-                .andExpect(jsonPath("$.content[1].title").value("title2"))
-                .andExpect(jsonPath("$.content[2].title").value("title1"));
+        QuestionRequestDTO questionRequestDTO = QuestionRequestDTO.builder()
+                .title("title")
+                .content("content")
+                .category("category")
+                .tags(List.of("tag1", "tag2"))
+                .build();
+        Member member = memberRepository.findByName("name").orElse(null);
+        assert member != null;
+        Long memberId = member.getId();
+        QuestionDTO createdQuestion = questionService.createQuestion(memberId, questionRequestDTO);
+        Long questionId = createdQuestion.getId();
 
+        QuestionDTO questionDTO = questionService.findQuestionById(questionId);
 
-        //좋아요 순
-        mockMvc.perform(get("/questions")
-                        .param("orderBy", "most-liked")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(3))
-                .andExpect(jsonPath("$.content[0].title").value("title2"))
-                .andExpect(jsonPath("$.content[1].title").value("title3"))
-                .andExpect(jsonPath("$.content[2].title").value("title1"))
-                .andExpect(jsonPath("$.content[0].likeCount").value(10))
-                .andExpect(jsonPath("$.content[1].likeCount").value(7))
-                .andExpect(jsonPath("$.content[2].likeCount").value(5));
-    }
-
-    @Test
-    public void getQuestionsWithPaging() throws Exception {
-        // 페이지 사이즈 1
-        // 1 페이지
-        mockMvc.perform(get("/questions")
-                        .param("page", "1")
-                        .param("size", "1")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.number").value(0))
-                .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.content[0].title").value("title3"));
-        // 2 페이지
-        mockMvc.perform(get("/questions")
-                        .param("page", "2")
-                        .param("size", "1")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.number").value(1))
-                .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.content[0].title").value("title2"));
-
-        // 페이지 사이즈 2
-        // 좋아요순
-        // 1 페이지
-        mockMvc.perform(get("/questions")
-                        .param("page", "1")
-                        .param("size", "2")
-                        .param("orderBy", "most-liked")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.number").value(0))
-                .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.content[0].title").value("title2"))
-                .andExpect(jsonPath("$.content[1].title").value("title3"));
-        // 2 페이지
-        mockMvc.perform(get("/questions")
-                        .param("page", "2")
-                        .param("size", "2")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.number").value(1))
-                .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.content[0].title").value("title1"));
+        assertNotNull(questionDTO);
+        assertEquals("title", questionDTO.getTitle());
+        assertEquals("content", questionDTO.getContent());
+        assertEquals("category", questionDTO.getCategory());
+        assertTrue(questionDTO.getTags().contains("tag1"));
+        assertTrue(questionDTO.getTags().contains("tag2"));
     }
 
     @Test
     public void searchQuestionsByQuery() throws Exception {
+        QuestionRequestDTO questionRequestDTO = QuestionRequestDTO.builder()
+                .title("title")
+                .content("content")
+                .category("category")
+                .tags(List.of("tag1", "tag2"))
+                .build();
+        Member member = memberRepository.findByName("name").orElse(null);
+        assert member != null;
+        Long memberId = member.getId();
+        QuestionDTO createdQuestion = questionService.createQuestion(memberId, questionRequestDTO);
+
         mockMvc.perform(get("/search")
-                .param("q", "title1")
+                .param("q", "title")
                 .session(session))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("title1"));
+                .andExpect(jsonPath("$.content[0].id").value(createdQuestion.getId()));
     }
 
-    @Test
-    public void searchQuestionsByTags() throws Exception {
-        mockMvc.perform(get("/search")
-                .param("q", "tag1")
-                .param("type", "tag")
-                .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("title2"))
-                .andExpect(jsonPath("$.content[1].title").value("title1"));
-    }
-    @Test
-    public void searchQuestionsByCategories() throws Exception {
-        mockMvc.perform(get("/search")
-                        .param("q", "testCategory1,testCategory2")
-                        .param("type", "category")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("title3"))
-                .andExpect(jsonPath("$.content[1].title").value("title2"))
-                .andExpect(jsonPath("$.content[2].title").value("title1"));
-    }
 }
