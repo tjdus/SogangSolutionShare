@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
@@ -24,23 +25,28 @@ public class EmailService {
     private final TempRepository tempRepository;
 
 
-    public void sendAuthorizationEmail(String email) throws MessagingException {
+    @Transactional
+    public void sendAuthorizationEmail(String email){
         // 이메일 전송 로직
-        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
 
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        helper.setTo(email);
-        helper.setSubject("Sogang Solution Share 회원가입 인증 메일입니다.");
+            helper.setTo(email);
+            helper.setSubject("Sogang Solution Share 회원가입 인증 메일입니다.");
 
-        Context context = new Context();
-        context.setVariable("number", String.valueOf(new Random().nextInt(1000000) % 1000000));
-        tempRepository.save(new Temp(email, context.getVariable("number").toString()));
+            Context context = new Context();
+            context.setVariable("number", String.valueOf(new Random().nextInt(1000000) % 1000000));
+            tempRepository.save(new Temp(email, context.getVariable("number").toString()));
 
-        String html = templateEngine.process("templateMail", context);
-        helper.setText(html, true);
+            String html = templateEngine.process("templateMail", context);
+            helper.setText(html, true);
 
-        javaMailSender.send(message);
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("이메일 전송에 실패하였습니다.");
+        }
     }
 
     public String checkEmail(String email, String authorizationNumber) {
