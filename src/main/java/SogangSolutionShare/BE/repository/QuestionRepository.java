@@ -2,6 +2,7 @@ package SogangSolutionShare.BE.repository;
 
 import SogangSolutionShare.BE.domain.Category;
 import SogangSolutionShare.BE.domain.Question;
+import SogangSolutionShare.BE.domain.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Page<Question> findByIdIn(List<Long> ids, Pageable pageable);
     @Query("SELECT q FROM Question q WHERE q.title LIKE %:query% OR q.content LIKE %:query%")
     Page<Question> findByTitlesAndContents(@Param("query") String query, Pageable pageable);
+
+    Page<Question> findByTitleContains(String title, Pageable pageable);
+
+    Page<Question> findByContentContains(String content, Pageable pageable);
+
+    Page<Question> findByQuestionTagsTagIn(List<Tag> tags, Pageable pageable);
 }

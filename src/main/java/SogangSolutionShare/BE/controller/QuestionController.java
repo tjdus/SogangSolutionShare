@@ -1,22 +1,21 @@
 package SogangSolutionShare.BE.controller;
 
+import SogangSolutionShare.BE.annotation.Login;
+import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
+import SogangSolutionShare.BE.domain.dto.QuestionRequestDTO;
 import SogangSolutionShare.BE.service.QuestionService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,10 +26,12 @@ public class QuestionController {
 
     // 질문 작성 API
     @PostMapping("/question")
-    public ResponseEntity<Void> createQuestion(@ModelAttribute QuestionDTO questionDTO) {
-        log.info("QuestionDTO: {}", questionDTO);
-        questionService.createQuestion(questionDTO);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<QuestionDTO> createQuestion(
+            @Login Member loginMember,
+            @Valid @ModelAttribute QuestionRequestDTO questionRequestDTO) {
+
+        QuestionDTO createdQuestion = questionService.createQuestion(loginMember.getId(), questionRequestDTO);
+        return ResponseEntity.ok(createdQuestion);
     }
     // 질문 조회 API
     @GetMapping("/question/{questionId}")
@@ -66,15 +67,20 @@ public class QuestionController {
 
     // 질문 수정 API
     @PatchMapping("/question/{questionId}")
-    public ResponseEntity<Void> updateQuestion(@PathVariable("questionId") Long questionId, @ModelAttribute QuestionDTO questionDTO) {
-        questionService.updateQuestion(questionId, questionDTO);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<QuestionDTO> updateQuestion(
+            @PathVariable("questionId") Long questionId,
+            @Login Member loginMember,
+            @Valid @ModelAttribute QuestionRequestDTO questionRequestDTO) {
+        QuestionDTO updatedQuestion = questionService.updateQuestion(loginMember.getId(), questionId, questionRequestDTO);
+        return ResponseEntity.ok(updatedQuestion);
     }
 
     // 질문 삭제 API
     @DeleteMapping("/question/{questionId}")
-    public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId) {
-        questionService.deleteQuestion(questionId);
+    public ResponseEntity<Void> deleteQuestion(
+            @PathVariable("questionId") Long questionId,
+            @Login Member loginMember) {
+        questionService.deleteQuestion(loginMember.getId(), questionId);
         return ResponseEntity.ok().build();
     }
 

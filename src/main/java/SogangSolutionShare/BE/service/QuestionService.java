@@ -3,7 +3,9 @@ package SogangSolutionShare.BE.service;
 import SogangSolutionShare.BE.domain.*;
 import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
+import SogangSolutionShare.BE.domain.dto.QuestionRequestDTO;
 import SogangSolutionShare.BE.domain.dto.SearchCriteria;
+import SogangSolutionShare.BE.exception.*;
 import SogangSolutionShare.BE.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,17 +30,18 @@ public class QuestionService {
     private final TagRepository tagRepository;
     private final QuestionTagRepository questionTagRepository;
 
-    private QuestionDTO convertToDTO(Question question) {
-        List<String> tagNames = questionTagRepository.findByQuestionId(question.getId())
-                .stream()
-                .map(qt -> qt.getTag().getName())
-                .collect(Collectors.toList());
-        return question.toDTO(tagNames);
-    }
-
     private Pageable createPageable(Integer page, Integer size, String orderBy){
         Sort sort;
         switch (orderBy) {
+            case "most-answered":
+                sort = Sort.by("answerCount").descending();
+                break;
+            case "least-answered":
+                sort = Sort.by("answerCount").ascending();
+                break;
+            case "most-viewed":
+                sort = Sort.by("viewCount").descending();
+                break;
             case "most-liked":
                 sort = Sort.by("likeCount").descending();
                 break;
@@ -51,122 +53,132 @@ public class QuestionService {
         return PageRequest.of(page, size, sort);
     }
 
-    public void createQuestion(QuestionDTO questionDTO) {
-        Long memberId = questionDTO.getMemberId();
+    @Transactional
+    public QuestionDTO createQuestion(Long memberId, QuestionRequestDTO questionRequest) {
+        log.info("QuestionRequest : {}", questionRequest);
 
         // memberId로 Member 찾아서 없으면 예외처리
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("Member does not exist"));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
 
-        // CategoryName 로 Category 찾아서 없으면 예외처리
-        Category category = categoryRepository.findByName(questionDTO.getCategoryName()).orElseThrow(() -> new IllegalArgumentException("Category does not exist"));
+        // CategoryName으로 Category 찾아서 없으면 예외처리
+        Category category = categoryRepository.findByName(questionRequest.getCategory())
+                .orElseThrow(CategoryNotFoundException::new);
 
         // TagName으로 Tag 찾아서 없으면 태그 생성
-        List<String> tags = questionDTO.getTags();
-        tags.forEach(tagName -> {
-            tagRepository.findByName(tagName).orElseGet(() -> {
-                return tagRepository.save(new Tag(tagName));
-            });
-        });
+        List<Tag> tagList = questionRequest.getTags().stream()
+                .map(tagName -> tagRepository.findByName(tagName)
+                        .orElseGet(() -> tagRepository.save(new Tag(tagName))))
+                .toList();
 
-
-        log.info("Member: {}", member);
-        log.info("Category: {}", category);
-
-        // Member 존재하면 Question 생성하고 저장
+        // 질문 생성
         Question createdQuestion = Question.builder()
-                        .member(member)
-                        .category(category)
-                        .title(questionDTO.getTitle())
-                        .content(questionDTO.getContent())
-                        .likeCount(0L)
-                        .viewCount(0L)
-                        .build();
-
-        log.info("Question created: {}", createdQuestion);
+                .member(member)
+                .category(category)
+                .title(questionRequest.getTitle())
+                .content(questionRequest.getContent())
+                .build();
+        // 태그 저장
+        tagList.forEach(createdQuestion::addQuestionTag);
 
         questionRepository.save(createdQuestion);
 
-        // Question과 Tag 연결
-        tags.forEach(tagName -> {
-            Tag tag = tagRepository.findByName(tagName).orElseThrow(() -> new IllegalArgumentException("Tag does not exist"));
-            questionTagRepository.save(QuestionTag.builder()
-                    .question(createdQuestion)
-                    .tag(tag)
-                    .build());
-        });
+        log.info("Question created: {}", createdQuestion);
 
-
+        return createdQuestion.toDTO();
     }
 
     public QuestionDTO findQuestionById(Long questionId) {
         Question question = questionRepository.findOneById(questionId);
-        return convertToDTO(question);
+        return question.toDTO();
     }
 
-    public void updateQuestion(Long questionId, QuestionDTO questionDTO) {
-        Question question = questionRepository.findById(questionId).orElseThrow(() -> new IllegalArgumentException("Question does not exist"));
-        question.setTitle(questionDTO.getTitle());
-        question.setContent(questionDTO.getContent());
-        question.setUpdatedAt(LocalDateTime.now());
+    @Transactional
+    public QuestionDTO updateQuestion(Long memberId, Long questionId, QuestionRequestDTO questionRequestDTO) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(QuestionNotFoundException::new);
+
+        // 글 수정 권한 확인
+        if (!question.getMember().getId().equals(memberId)) {
+            throw new ForbiddenException();
+        }
+
+        // 제목과 내용 수정
+        question.setTitle(questionRequestDTO.getTitle());
+        question.setContent(questionRequestDTO.getContent());
+
+        // 카테고리 수정
+        Category category = categoryRepository.findByName(questionRequestDTO.getCategory())
+                .orElseThrow(CategoryNotFoundException::new);
+        question.setCategory(category);
+
+        // 기존 태그 제거
+        question.clearQuestionTags();
+
+        // 새로운 태그 추가
+        List<Tag> tags = questionRequestDTO.getTags().stream()
+                .map(tagName -> tagRepository.findByName(tagName)
+                        .orElseGet(() -> tagRepository.save(new Tag(tagName))))
+                .toList();
+
+        tags.forEach(question::addQuestionTag);
 
         log.info("Question updated: {}", question);
+
+        return question.toDTO();
     }
 
-
-    public Page<QuestionDTO> findQuestionsByMemberId(Long memberId, Pageable pageable) {
+    public Page<QuestionDTO> findQuestionsByMemberId(Long memberId, Criteria criteria) {
+        Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
         // memberId로 Member 찾아서 없으면 예외처리
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("Member does not exist"));
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         Page<Question> questionPage = questionRepository.findAllByMemberId(member.getId(), pageable);
-        return questionPage.map(this::convertToDTO);
+        return questionPage.map(Question::toDTO);
     }
     public Page<QuestionDTO> findQuestionsByCategoryId(Criteria criteria, Long categoryId) {
         Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
         Category category = categoryRepository.findById(categoryId).orElse(null);
 
         Page<Question> questionPage = questionRepository.findByCategory(category, pageable);
-        return questionPage.map(this::convertToDTO);
+        return questionPage.map(Question::toDTO);
     }
     public Page<QuestionDTO> findQuestionsByTagId(Criteria criteria, Long tagId) {
         Pageable pageable =createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
-        Tag tag = tagRepository.findById(tagId).orElse(null);
+        Tag tag = tagRepository.findById(tagId).orElseThrow(TagNotFoundException::new);
+        Page<Question> questionPage = questionRepository.findByQuestionTagsTagIn(List.of(tag), pageable);
+        return questionPage.map(Question::toDTO);
+    }
 
-        Page<Question> questionPage = findQuestionsByTags(List.of(tag), pageable);
-        return questionPage.map(this::convertToDTO);
+    public Page<QuestionDTO> findQuestionsByTags(Criteria criteria, String tags) {
+        String[] tagNames = tags.split("\\+");
+
+        // 태그 이름에 해당하는 Tag 엔티티들을 조회하여 리스트에 저장
+        List<Tag> tagList = new ArrayList<>();
+        for (String tagName : tagNames) {
+            tagRepository.findByName(tagName).ifPresent(tagList::add);
+        }
+        Pageable pageable =createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
+        Page<Question> questionPage = questionRepository.findByQuestionTagsTagIn(tagList, pageable);
+
+        return questionPage.map(Question::toDTO);
     }
 
     public Page<QuestionDTO> findQuestions(Criteria criteria){
         Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
 
         Page<Question> questionPage = questionRepository.findAll(pageable);
-        return questionPage.map(this::convertToDTO);
+        return questionPage.map(Question::toDTO);
     }
 
-    private Page<Question> findQuestionsByTags(List<Tag> tags, Pageable pageable) {
-        List<Long> questionIds = questionTagRepository.findByTagIn(tags).stream()
-                .map(QuestionTag::getQuestion)
-                .map(Question::getId)
-                .distinct()
-                .collect(Collectors.toList());
 
-        return questionRepository.findByIdIn(questionIds, pageable);
-    }
-    private Page<Question> findQuestionsByCategories(List<Category> categories, Pageable pageable) {
-        return questionRepository.findByCategoryIn(categories, pageable);
-    }
-    private Page<Question> findQuestionsByCategoryAndTags(Category category, List<Tag> tags, Pageable pageable){
-        List<QuestionTag> questionTags = questionTagRepository.findByTagIn(tags);
+    public void deleteQuestion(Long memberId, Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(QuestionNotFoundException::new);
 
-        List<Long> questionIds = questionTags.stream()
-                .map(QuestionTag::getQuestion)
-                .filter(question -> category.equals(question.getCategory())) // 카테고리 필터링
-                .map(Question::getId)
-                .distinct()
-                .collect(Collectors.toList());
-        return questionRepository.findByIdIn(questionIds, pageable);
-    }
-
-    public void deleteQuestion(Long questionId) {
-        Question question = questionRepository.findById(questionId).orElseThrow(() -> new IllegalArgumentException("Question does not exist"));
+        // 글 삭제 권한 확인
+        if (!question.getMember().getId().equals(memberId)) {
+            throw new ForbiddenException();
+        }
         questionRepository.delete(question);
 
         log.info("Question deleted: {}", question);
@@ -175,15 +187,9 @@ public class QuestionService {
 
     private Page<QuestionDTO> searchByTitlesAndContents(String query, Pageable pageable) {
         Page<Question> questionPage = questionRepository.findByTitlesAndContents(query, pageable);
-        return questionPage.map(this::convertToDTO);
+        return questionPage.map(Question::toDTO);
     }
-    private Page<QuestionDTO> searchByTags(String tagString, Pageable pageable) {
-        List<String> tagNames = tagString != null ? Arrays.asList(tagString.split(",")) : List.of();
-        List<Tag> tags = getTagsByNames(tagNames);
-        Page<Question> questionPage = findQuestionsByTags(tags, pageable);
-        return questionPage.map(this::convertToDTO);
 
-    }
 
     private List<Tag> getTagsByNames(List<String> tagNames) {
         return tagNames.stream()
@@ -193,12 +199,7 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
-    private Page<QuestionDTO> searchByCategories(String categoryString, Pageable pageable) {
-        List<String> categoryNames = categoryString != null ? Arrays.asList(categoryString.split(",")) : List.of();
-        List<Category> categories = getCategoriesByNames(categoryNames);
-        Page<Question> questionPage = findQuestionsByCategories(categories, pageable);
-        return questionPage.map(this::convertToDTO);
-    }
+
 
     private List<Category> getCategoriesByNames(List<String> categoryNames) {
         return categoryNames.stream()
@@ -208,13 +209,19 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
+    private Page<QuestionDTO> searchByTitle(String title, Pageable pageable) {
+        return questionRepository.findByTitleContains(title, pageable).map(Question::toDTO);
+    }
+    private Page<QuestionDTO> searchByContent(String content, Pageable pageable) {
+        return questionRepository.findByContentContains(content, pageable).map(Question::toDTO);
+    }
     public Page<QuestionDTO> searchQuestions(SearchCriteria searchCriteria) {
         String searchType = searchCriteria.getType();
         Pageable pageable = createPageable(searchCriteria.getPage(), searchCriteria.getSize(), searchCriteria.getOrderBy());
         return switch (searchType) {
-            case "tag" -> searchByTags(searchCriteria.getQ(), pageable);
-            case "category" -> searchByCategories(searchCriteria.getQ(), pageable);
-            default -> searchByTitlesAndContents(searchCriteria.getQ(), pageable);
+            case "content" -> searchByContent(searchCriteria.getQ(), pageable);
+            case "title+content" -> searchByTitlesAndContents(searchCriteria.getQ(), pageable);
+            default -> searchByTitle(searchCriteria.getQ(), pageable);
         };
     }
 

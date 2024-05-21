@@ -5,17 +5,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder
 @AllArgsConstructor
 public class QuestionDTO {
-    private Long memberId;
-    private String categoryName;
+    private Long id;
+    private String loginId;
     private String title;
     private String content;
-    private Long likeCount;
+    private String category;
     private List<String> tags;
+    private Long likeCount;
+    private Long viewCount;
+    private Long answerCount;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 
 }
