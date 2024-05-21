@@ -1,5 +1,6 @@
 package SogangSolutionShare.BE.domain;
 
+import SogangSolutionShare.BE.domain.dto.AnswerDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,8 @@ public class Answer {
     @JoinColumn(name = "question_id")
     private Question question;
 
+    private Integer idx;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -38,4 +41,19 @@ public class Answer {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Builder.Default
+    private Long likeCount = 0L;
+
+    public AnswerDTO toDTO() {
+        return AnswerDTO.builder()
+                .id(id)
+                .loginId(member.getLoginId())
+                .questionId(question.getId())
+                .likeCount(likeCount)
+                .content(content)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .build();
+    }
 }
