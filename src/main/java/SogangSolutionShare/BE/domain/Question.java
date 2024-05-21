@@ -2,6 +2,7 @@ package SogangSolutionShare.BE.domain;
 
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,15 +48,23 @@ public class Question {
     private LocalDateTime updatedAt;
 
     @Builder.Default
+    @Min(0)
     private Long likeCount = 0L;
     @Builder.Default
+    @Min(0)
     private Long viewCount = 0L;
     @Builder.Default
+    @Min(0)
     private Long answerCount = 0L;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<QuestionTag> questionTags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Answer> answers = new ArrayList<>();
+
     @Override
     public String toString() {
         return "Question{" +
@@ -104,4 +113,15 @@ public class Question {
         });
         this.questionTags.clear();
     }
+
+    public void addAnswer(Answer answer){
+        answers.add(answer);
+        setAnswerCount(answerCount+1);
+    }
+
+    public void deleteAnswer(Answer answer) {
+        answers.remove(answer);
+        setAnswerCount(answerCount-1);
+    }
+
 }

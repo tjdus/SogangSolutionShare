@@ -10,14 +10,14 @@ import SogangSolutionShare.BE.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static SogangSolutionShare.BE.controller.PageableUtil.createPageable;
 
 @Service
 @RequiredArgsConstructor
@@ -29,29 +29,6 @@ public class QuestionService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final QuestionTagRepository questionTagRepository;
-
-    private Pageable createPageable(Integer page, Integer size, String orderBy){
-        Sort sort;
-        switch (orderBy) {
-            case "most-answered":
-                sort = Sort.by("answerCount").descending();
-                break;
-            case "least-answered":
-                sort = Sort.by("answerCount").ascending();
-                break;
-            case "most-viewed":
-                sort = Sort.by("viewCount").descending();
-                break;
-            case "most-liked":
-                sort = Sort.by("likeCount").descending();
-                break;
-            case "latest":
-            default:
-                sort = Sort.by("createdAt").descending();
-                break;
-        }
-        return PageRequest.of(page, size, sort);
-    }
 
     @Transactional
     public QuestionDTO createQuestion(Long memberId, QuestionRequestDTO questionRequest) {
