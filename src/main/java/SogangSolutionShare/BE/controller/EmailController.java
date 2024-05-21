@@ -21,10 +21,15 @@ public class EmailController {
     private final EmailService emailService;
 
     @PostMapping("/send")
-    public void sendEmail(@RequestBody EmailRequestDTO emailRequestDTO) throws MessagingException {
+    public ResponseEntity<String> sendEmail(@RequestBody EmailRequestDTO emailRequestDTO){
         log.info("Email: {}", emailRequestDTO.getEmail());
         // 이메일 전송 API
-        emailService.sendAuthorizationEmail(emailRequestDTO.getEmail());
+        try {
+            emailService.sendAuthorizationEmail(emailRequestDTO.getEmail());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("이메일 전송에 실패하였습니다.");
+        }
+        return ResponseEntity.ok("이메일 인증번호 전송에 성공하였습니다.");
     }
 
     @PostMapping("/check")

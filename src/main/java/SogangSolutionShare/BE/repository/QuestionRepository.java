@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
@@ -26,4 +27,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Page<Question> findByContentContains(String content, Pageable pageable);
 
     Page<Question> findByQuestionTagsTagIn(List<Tag> tags, Pageable pageable);
+
+    Optional<Question> findByTitle(String title);
 }

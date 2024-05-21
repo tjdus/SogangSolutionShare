@@ -5,7 +5,9 @@ import SogangSolutionShare.BE.domain.dto.JoinDTO;
 import SogangSolutionShare.BE.domain.dto.LoginDTO;
 import SogangSolutionShare.BE.domain.dto.MemberResponseDTO;
 import SogangSolutionShare.BE.service.MemberService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -75,9 +77,10 @@ public class LoginController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request) {
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         session.invalidate();
+        response.addCookie(new Cookie("JSESSIONID", null));
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 }

@@ -15,14 +15,14 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping("/question")
-    public ResponseEntity<Void> createQuestionLike(@ModelAttribute QuestionLikeDTO questionLikeDTO) {
+    public ResponseEntity<Void> createQuestionLike(@RequestBody QuestionLikeDTO questionLikeDTO) {
         // 좋아요 생성 API
         likeService.createQuestionLike(questionLikeDTO);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/question")
-    public ResponseEntity<Void> deleteQuestionLike(@ModelAttribute QuestionLikeDTO questionLikeDTO) {
+    public ResponseEntity<Void> deleteQuestionLike(@RequestBody QuestionLikeDTO questionLikeDTO) {
         // 좋아요 생성 API
         likeService.deleteQuestionLike(questionLikeDTO);
         return ResponseEntity.ok().build();
@@ -30,9 +30,16 @@ public class LikeController {
 
 
     @PostMapping("/answer")
-    public ResponseEntity<Void> createAnswerLike(@ModelAttribute AnswerLikeDTO answerLikeDTO) {
+    public ResponseEntity<Void> createAnswerLike(@RequestBody AnswerLikeDTO answerLikeDTO) {
         // 좋아요 생성 API
         likeService.createAnswerLike(answerLikeDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/answer")
+    public ResponseEntity<Void> deleteAnswerLike(@RequestBody AnswerLikeDTO answerLikeDTO) {
+        // 좋아요 생성 API
+        likeService.deleteAnswerLike(answerLikeDTO);
         return ResponseEntity.ok().build();
     }
 }
