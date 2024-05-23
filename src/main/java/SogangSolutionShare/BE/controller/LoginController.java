@@ -4,6 +4,7 @@ import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.dto.JoinDTO;
 import SogangSolutionShare.BE.domain.dto.LoginDTO;
 import SogangSolutionShare.BE.domain.dto.MemberResponseDTO;
+import SogangSolutionShare.BE.repository.MemberRepository;
 import SogangSolutionShare.BE.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
 
     private final MemberService loginService;
+    private final MemberRepository memberRepository;
 
 
     /**
@@ -82,5 +84,16 @@ public class LoginController {
         session.invalidate();
         response.addCookie(new Cookie("JSESSIONID", null));
         return ResponseEntity.ok("로그아웃 되었습니다.");
+    }
+
+    @GetMapping("/session")
+    public ResponseEntity<Void> session(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Member member = (Member) session.getAttribute("loginMember");
+        if(member == null || memberRepository.findById(member.getId()).isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        return ResponseEntity.ok().build();
     }
 }
