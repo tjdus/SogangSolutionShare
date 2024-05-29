@@ -1,5 +1,7 @@
 package SogangSolutionShare.BE.controller;
 
+import SogangSolutionShare.BE.annotation.Login;
+import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.dto.AnswerLikeDTO;
 import SogangSolutionShare.BE.domain.dto.QuestionLikeDTO;
 import SogangSolutionShare.BE.service.LikeService;
@@ -41,5 +43,17 @@ public class LikeController {
         // 좋아요 생성 API
         likeService.deleteAnswerLike(answerLikeDTO);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/question/{questionId}")
+    public ResponseEntity<Boolean> isUserQuestionLike(@Login Member loginMember, @PathVariable Long questionId) {
+        // 로그인한 사용자가 해당 질문에 좋아요를 눌렀는지 여부
+        return ResponseEntity.ok(likeService.isUserQuestionLike(loginMember, questionId));
+    }
+
+    @GetMapping("/answer/{answerId}")
+    public ResponseEntity<Boolean> isUserAnswerLike(@Login Member loginMember, @PathVariable Long answerId) {
+        // 로그인한 사용자가 해당 답변에 좋아요를 눌렀는지 여부
+        return ResponseEntity.ok(likeService.isUserAnswerLike(loginMember, answerId));
     }
 }

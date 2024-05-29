@@ -209,4 +209,8 @@ public class QuestionService {
     }
 
 
+    @Transactional(readOnly = true)
+    public Long getQuestionCount() {
+        return questionRepository.count();
+    }
 }

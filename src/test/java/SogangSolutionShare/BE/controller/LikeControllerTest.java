@@ -21,14 +21,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -126,6 +126,56 @@ public class LikeControllerTest {
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
+    }
 
+    @Test
+    public void isUserLikedQuestion() throws Exception {
+        Optional<Question> question = questionRepository.findByTitle("question");
+        Optional<Member> member = memberRepository.findByName("name");
+
+        QuestionLikeDTO questionLikeDTO = new QuestionLikeDTO();
+        questionLikeDTO.setQuestionId(question.get().getId());
+        questionLikeDTO.setMemberId(member.get().getId());
+
+        String in = objectMapper.writeValueAsString(questionLikeDTO);
+
+        mockMvc.perform(post("/like/question")
+                        .session(session)
+                        .contentType("application/json")
+                        .content(in))
+                .andExpect(status().isOk());
+
+        ResultActions resultActions = mockMvc.perform(get("/like/question/{questionId}", question.get().getId())
+                        .session(session))
+                .andExpect(status().isOk());
+
+        String result = resultActions.andReturn().getResponse().getContentAsString();
+        assertEquals("true", result);
+    }
+
+    @Test
+    public void isUserLikedAnswer() throws Exception {
+        Optional<Question> question = questionRepository.findByTitle("question");
+        Answer answer = answerRepository.findByQuestionId(question.get().getId()).get(0);
+        Optional<Member> member = memberRepository.findByName("name");
+
+        AnswerLikeDTO answerLikeDTO = new AnswerLikeDTO();
+        answerLikeDTO.setAnswerId(answer.getId());
+        answerLikeDTO.setMemberId(member.get().getId());
+
+        String in = objectMapper.writeValueAsString(answerLikeDTO);
+
+        mockMvc.perform(post("/like/answer")
+                        .session(session)
+                        .contentType("application/json")
+                        .content(in))
+                .andExpect(status().isOk());
+
+        ResultActions resultActions = mockMvc.perform(get("/like/answer/{answerId}", answer.getId())
+                        .session(session))
+                .andExpect(status().isOk());
+
+        String result = resultActions.andReturn().getResponse().getContentAsString();
+        assertEquals("true", result);
     }
 }

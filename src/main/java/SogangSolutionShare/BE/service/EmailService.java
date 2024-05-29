@@ -27,6 +27,9 @@ public class EmailService {
 
     @Transactional
     public void sendAuthorizationEmail(String email){
+        // 재전송 시 기존 인증번호 삭제
+        tempRepository.findByEmail(email).ifPresent(tempRepository::delete);
+
         // 이메일 전송 로직
         try {
             MimeMessage message = javaMailSender.createMimeMessage();

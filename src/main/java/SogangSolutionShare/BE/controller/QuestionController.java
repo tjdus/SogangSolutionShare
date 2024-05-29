@@ -97,4 +97,11 @@ public class QuestionController {
         Page<QuestionDTO> questions = questionService.findQuestions(criteria);
         return ResponseEntity.ok(questions);
     }
+
+    // 질문 개수 조회
+    @GetMapping("/questions/count")
+    public ResponseEntity<Long> getQuestionCount() {
+        Long count = questionService.getQuestionCount();
+        return ResponseEntity.ok(count);
+    }
 }

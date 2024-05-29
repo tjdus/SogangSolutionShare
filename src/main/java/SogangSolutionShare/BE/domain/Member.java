@@ -35,6 +35,8 @@ public class Member {
 
     private String email;
 
+    private Boolean isAuthorized;
+
     @CreatedDate
     private LocalDateTime createdAt;
 

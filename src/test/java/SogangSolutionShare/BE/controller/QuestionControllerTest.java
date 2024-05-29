@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -193,6 +194,27 @@ public class QuestionControllerTest {
                 .session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(createdQuestion.getId()));
+    }
+
+    @Test
+    public void getQuestionsCount() throws Exception {
+        QuestionRequestDTO questionRequestDTO = QuestionRequestDTO.builder()
+                .title("title")
+                .content("content")
+                .category("category")
+                .tags(List.of("tag1", "tag2"))
+                .build();
+        Member member = memberRepository.findByName("name").orElse(null);
+        assert member != null;
+        Long memberId = member.getId();
+        QuestionDTO createdQuestion = questionService.createQuestion(memberId, questionRequestDTO);
+
+        ResultActions resultActions = mockMvc.perform(get("/questions/count")
+                        .session(session))
+                .andExpect(status().isOk());
+
+        String contentAsString = resultActions.andReturn().getResponse().getContentAsString();
+        assertEquals("1", contentAsString);
     }
 
 }
