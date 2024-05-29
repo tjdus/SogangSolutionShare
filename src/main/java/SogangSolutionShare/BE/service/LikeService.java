@@ -98,4 +98,21 @@ public class LikeService {
     }
 
 
+    public Boolean isUserQuestionLike(Member loginMember, Long questionId) {
+        Question question = questionRepository.findById(questionId).orElseThrow(QuestionNotFoundException::new);
+        Member member = memberRepository.findById(loginMember.getId()).orElseThrow(MemberNotFoundException::new);
+
+        Optional<QuestionLike> questionLike = questionLikeRepository.findByQuestionIdAndMemberId(question.getId(), member.getId());
+
+        return questionLike.isPresent();
+    }
+
+    public Boolean isUserAnswerLike(Member loginMember, Long answerId) {
+        Answer answer = answerRepository.findById(answerId).orElseThrow(AnswerNotFoundException::new);
+        Member member = memberRepository.findById(loginMember.getId()).orElseThrow(MemberNotFoundException::new);
+
+        Optional<AnswerLike> answerLike = answerLikeRepository.findByAnswerIdAndMemberId(answer.getId(), member.getId());
+
+        return answerLike.isPresent();
+    }
 }

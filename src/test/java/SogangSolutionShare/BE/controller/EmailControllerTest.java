@@ -75,4 +75,38 @@ public class EmailControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void 이메일_인증_재전송() throws Exception {
+        // given
+        EmailRequestDTO emailRequestDTO = new EmailRequestDTO();
+        emailRequestDTO.setEmail("bon0057@naver.com");
+
+        // when
+        mockMvc.perform(post("/email/send")
+                        .session(session)
+                        .content(objectMapper.writeValueAsString(emailRequestDTO))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/email/send")
+                        .session(session)
+                        .content(objectMapper.writeValueAsString(emailRequestDTO))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        Temp temp = tempRepository.findByEmail(emailRequestDTO.getEmail()).orElseThrow(() -> new IllegalArgumentException("이메일이 존재하지 않습니다."));
+
+        EmailCheckDTO emailCheckDTO = new EmailCheckDTO();
+        emailCheckDTO.setEmail(emailRequestDTO.getEmail());
+        emailCheckDTO.setAuthorizationNumber(temp.getAuthorizationNumber());
+
+        // then
+        mockMvc.perform(post("/email/check")
+                        .session(session)
+                        .content(objectMapper.writeValueAsString(emailCheckDTO))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+    }
+
 }

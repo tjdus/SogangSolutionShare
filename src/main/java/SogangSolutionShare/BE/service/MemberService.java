@@ -40,6 +40,7 @@ public class MemberService {
                 .password(joinDTO.getPassword())
                 .email(joinDTO.getEmail())
                 .name(joinDTO.getName())
+                .isAuthorized(joinDTO.getIsAuthorized())
                 .build();
 
         log.info("Member created: {}", createdMember);
