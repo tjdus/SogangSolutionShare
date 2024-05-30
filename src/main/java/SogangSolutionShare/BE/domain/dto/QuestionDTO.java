@@ -19,6 +19,7 @@ public class QuestionDTO {
     private String category;
     private List<String> tags;
     private Long likeCount;
+    private Long dislikeCount;
     private Long viewCount;
     private Long answerCount;
     private LocalDateTime createdAt;

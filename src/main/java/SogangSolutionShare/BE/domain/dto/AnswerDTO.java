@@ -13,6 +13,7 @@ public class AnswerDTO {
     private String loginId;
     private String content;
     private Long likeCount;
+    private Long dislikeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

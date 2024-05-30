@@ -45,12 +45,16 @@ public class Answer {
     @Builder.Default
     private Long likeCount = 0L;
 
+    @Builder.Default
+    private Long dislikeCount = 0L;
+
     public AnswerDTO toDTO() {
         return AnswerDTO.builder()
                 .id(id)
                 .loginId(member.getLoginId())
                 .questionId(question.getId())
                 .likeCount(likeCount)
+                .dislikeCount(dislikeCount)
                 .content(content)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)

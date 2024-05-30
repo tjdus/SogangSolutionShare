@@ -29,4 +29,6 @@ public class AnswerLike {
 
     @CreatedDate
     private LocalDateTime createdAt;
+
+    private Boolean isLike;
 }

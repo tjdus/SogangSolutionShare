@@ -5,5 +5,4 @@ import lombok.Data;
 @Data
 public class AnswerLikeDTO {
     private Long answerId;
-    private Long memberId;
 }
