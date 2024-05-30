@@ -50,6 +50,11 @@ public class Question {
     @Builder.Default
     @Min(0)
     private Long likeCount = 0L;
+
+    @Builder.Default
+    @Min(0)
+    private Long dislikeCount = 0L;
+
     @Builder.Default
     @Min(0)
     private Long viewCount = 0L;
@@ -88,6 +93,7 @@ public class Question {
                 .category(category.getName())
                 .tags(tagNames)
                 .likeCount(likeCount)
+                .dislikeCount(dislikeCount)
                 .viewCount(viewCount)
                 .answerCount(answerCount)
                 .createdAt(createdAt)
