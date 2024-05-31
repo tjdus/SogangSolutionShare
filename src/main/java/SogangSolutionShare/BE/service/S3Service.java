@@ -20,7 +20,7 @@ public class S3Service {
     public String upload(MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
-            String fileUrl = "https://" + bucket + "/" + fileName;
+            String fileUrl = "https://" + bucket +".s3.ap-northeast-2.amazonaws.com/"+ fileName;
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(file.getSize());
             metadata.setContentType(file.getContentType());

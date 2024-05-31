@@ -1,10 +1,12 @@
 package SogangSolutionShare.BE.repository;
 
 import SogangSolutionShare.BE.domain.Category;
+import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.Question;
 import SogangSolutionShare.BE.domain.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +31,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Page<Question> findByQuestionTagsTagIn(List<Tag> tags, Pageable pageable);
 
     Optional<Question> findByTitle(String title);
+
+    @EntityGraph(attributePaths = {"questionLike"})
+    Page<Question> findAllByMember(Member member, Pageable pageable);
 }

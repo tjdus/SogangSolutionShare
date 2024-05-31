@@ -4,6 +4,5 @@ import lombok.Data;
 
 @Data
 public class ScrapDTO {
-    private Long memberId;
     private Long questionId;
 }

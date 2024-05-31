@@ -66,7 +66,7 @@ public class LoginController {
 
         // 로그인 실패
         if(member == null) {
-            // 401 Bad Request
+            // 401 Unauthorized
             return ResponseEntity.status(401).build();
         }
 
@@ -82,7 +82,7 @@ public class LoginController {
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         session.invalidate();
-        response.addCookie(new Cookie("JSESSIONID", null));
+        //response.addCookie(new Cookie("JSESSIONID", null));
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 

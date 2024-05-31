@@ -18,6 +18,7 @@ public class QuestionDTO {
     private String content;
     private String category;
     private List<String> tags;
+    private List<String> attachments;
     private Long likeCount;
     private Long dislikeCount;
     private Long viewCount;

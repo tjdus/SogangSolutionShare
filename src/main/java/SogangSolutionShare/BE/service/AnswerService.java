@@ -1,6 +1,7 @@
 package SogangSolutionShare.BE.service;
 
 import SogangSolutionShare.BE.domain.Answer;
+import SogangSolutionShare.BE.domain.AnswerLike;
 import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.Question;
 import SogangSolutionShare.BE.domain.dto.AnswerDTO;
@@ -9,6 +10,7 @@ import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.exception.ForbiddenException;
 import SogangSolutionShare.BE.exception.MemberNotFoundException;
 import SogangSolutionShare.BE.exception.QuestionNotFoundException;
+import SogangSolutionShare.BE.repository.AnswerLikeRepository;
 import SogangSolutionShare.BE.repository.AnswerRepository;
 import SogangSolutionShare.BE.repository.MemberRepository;
 import SogangSolutionShare.BE.repository.QuestionRepository;
@@ -29,6 +31,8 @@ public class AnswerService {
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
     private final MemberRepository memberRepository;
+    private final AnswerLikeRepository answerLikeRepository;
+
     @Transactional
     public AnswerDTO createAnswer(Long memberId, Long questionId, AnswerRequestDTO answerRequestDTO) {
 
@@ -98,6 +102,23 @@ public class AnswerService {
         Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
 
         Page<Answer> answerPage = answerRepository.findAllByQuestion(question, pageable);
+        return answerPage.map(Answer::toDTO);
+    }
+
+    public Page<AnswerDTO> findAnswersByMemberId(Long memberId, Criteria criteria) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
+
+        Page<Answer> answerPage = answerRepository.findAllByMember(member, pageable);
+        return answerPage.map(Answer::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AnswerDTO> findLikeAnswersByMemberId(Long memberId, Criteria criteria) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
+
+        Page<Answer> answerPage = answerLikeRepository.findAllByMember(member, pageable).map(AnswerLike::getAnswer);
         return answerPage.map(Answer::toDTO);
     }
 }
