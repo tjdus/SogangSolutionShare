@@ -70,6 +70,10 @@ public class Question {
     @Builder.Default
     private List<Answer> answers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Attachment> attachments = new ArrayList<>();
+
     @Override
     public String toString() {
         return "Question{" +
@@ -92,6 +96,7 @@ public class Question {
                 .content(content)
                 .category(category.getName())
                 .tags(tagNames)
+                .attachments(attachments.stream().map(Attachment::getFileName).collect(Collectors.toList()))
                 .likeCount(likeCount)
                 .dislikeCount(dislikeCount)
                 .viewCount(viewCount)
@@ -112,6 +117,8 @@ public class Question {
                 .build();
         questionTags.add(questionTag);
     }
+
+
     public void clearQuestionTags() {
         questionTags.forEach(questionTag -> {
             questionTag.setTag(null);
@@ -130,4 +137,7 @@ public class Question {
         setAnswerCount(answerCount-1);
     }
 
+    public void addAttachment(Attachment am) {
+        attachments.add(am);
+    }
 }

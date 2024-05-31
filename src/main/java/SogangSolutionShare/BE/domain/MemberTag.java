@@ -1,20 +1,14 @@
 package SogangSolutionShare.BE.domain;
 
-import SogangSolutionShare.BE.domain.dto.MemberDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.sql.ast.tree.expression.Over;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
@@ -22,30 +16,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Member {
+public class MemberTag {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long kakaoId;
 
-    private String loginId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
 
-    private String password;
-
-    private String name;
-
-    private String email;
-
-    private Boolean isAuthorized;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Tag tag;
 
     @CreatedDate
     private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
-
-
-    public MemberDTO toDTO() {
-        return new MemberDTO(name, email);
-    }
 }

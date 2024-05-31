@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static SogangSolutionShare.BE.controller.PageableUtil.createPageable;
 
@@ -29,6 +30,12 @@ public class QuestionService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final QuestionTagRepository questionTagRepository;
+
+    private final QuestionLikeRepository questionLikeRepository;
+
+    private final AttachmentRepository attachmentRepository;
+    private final MemberTagRepository memberTagRepository;
+    private final S3Service s3Service;
 
     @Transactional
     public QuestionDTO createQuestion(Long memberId, QuestionRequestDTO questionRequest) {
@@ -48,6 +55,12 @@ public class QuestionService {
                         .orElseGet(() -> tagRepository.save(new Tag(tagName))))
                 .toList();
 
+        tagList.forEach(tag -> memberTagRepository.findByMemberAndTag(member, tag)
+                .orElseGet(() -> memberTagRepository.save(MemberTag.builder()
+                        .member(member)
+                        .tag(tag)
+                        .build())));
+
         // 질문 생성
         Question createdQuestion = Question.builder()
                 .member(member)
@@ -55,10 +68,27 @@ public class QuestionService {
                 .title(questionRequest.getTitle())
                 .content(questionRequest.getContent())
                 .build();
+
         // 태그 저장
         tagList.forEach(createdQuestion::addQuestionTag);
 
         questionRepository.save(createdQuestion);
+
+        // 첨부파일 저장
+        if(questionRequest.getAttachments() == null) {
+            questionRequest.setAttachments(new ArrayList<>());
+        }
+        else {
+            questionRequest.getAttachments().forEach(attachment -> {
+                String fileName = s3Service.upload(attachment);
+                Attachment am = Attachment.builder()
+                        .question(createdQuestion)
+                        .fileName(fileName)
+                        .build();
+                Attachment save = attachmentRepository.save(am);
+                createdQuestion.addAttachment(save);
+            });
+        }
 
         log.info("Question created: {}", createdQuestion);
 
@@ -212,5 +242,14 @@ public class QuestionService {
     @Transactional(readOnly = true)
     public Long getQuestionCount() {
         return questionRepository.count();
+    }
+
+    public Page<QuestionLike> findLikeQuestionsByMemberId(Long memberId, Criteria criteria) {
+        Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+        Page<QuestionLike> questionLikes = questionLikeRepository.findAllByMember(member, pageable);
+
+        return questionLikes;
     }
 }

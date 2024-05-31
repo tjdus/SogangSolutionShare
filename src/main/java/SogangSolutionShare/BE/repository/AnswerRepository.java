@@ -1,6 +1,7 @@
 package SogangSolutionShare.BE.repository;
 
 import SogangSolutionShare.BE.domain.Answer;
+import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.Question;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
     Page<Answer> findAllByQuestion(Question question, Pageable pageable);
 
     List<Answer> findByQuestionId(Long id);
+
+    Page<Answer> findAllByMember(Member member, Pageable pageable);
 }

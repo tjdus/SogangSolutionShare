@@ -12,6 +12,7 @@ import SogangSolutionShare.BE.repository.MemberRepository;
 import SogangSolutionShare.BE.repository.QuestionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
+@Slf4j
 public class LikeControllerTest {
 
     @Autowired
@@ -66,6 +68,15 @@ public class LikeControllerTest {
         question.setCategory(category);
         question.setMember(member);
         questionRepository.save(question);
+
+        question = new Question();
+        question.setTitle("question1");
+        question.setContent("content1");
+        question.setCategory(category);
+        question.setMember(member);
+        questionRepository.save(question);
+
+
 
         Answer answer = new Answer();
         answer.setContent("content");
@@ -244,5 +255,47 @@ public class LikeControllerTest {
 
         result = resultActions.andReturn().getResponse().getContentAsString();
         assertEquals("0", result);
+    }
+
+    @Test
+    public void createQuestionLikeAndSearch() throws Exception {
+        Optional<Question> question = questionRepository.findByTitle("question");
+
+        QuestionLikeDTO questionLikeDTO = new QuestionLikeDTO();
+        questionLikeDTO.setQuestionId(question.get().getId());
+
+        String in = objectMapper.writeValueAsString(questionLikeDTO);
+
+        mockMvc.perform(post("/like/question")
+                        .session(session)
+                        .contentType("application/json")
+                        .content(in))
+                .andExpect(status().isOk());
+
+        question = questionRepository.findByTitle("question1");
+
+        questionLikeDTO = new QuestionLikeDTO();
+        questionLikeDTO.setQuestionId(question.get().getId());
+
+        in = objectMapper.writeValueAsString(questionLikeDTO);
+
+        mockMvc.perform(post("/like/question")
+                        .session(session)
+                        .contentType("application/json")
+                        .content(in))
+                .andExpect(status().isOk());
+
+
+        ResultActions resultActions = mockMvc.perform(get("/profile/like/questions")
+                        .session(session)
+                        .param("page", "1"))
+                .andExpect(status().isOk());
+
+        String result = resultActions.andReturn().getResponse().getContentAsString();
+
+        log.info("result: {}", result);
+
+        assertTrue(result.contains("question"));
+        assertTrue(result.contains("question1"));
     }
 }
