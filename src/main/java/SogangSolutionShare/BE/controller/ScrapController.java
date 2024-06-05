@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/scrap")
+@RequestMapping("/api/scrap")
 @RequiredArgsConstructor
 public class ScrapController {
 

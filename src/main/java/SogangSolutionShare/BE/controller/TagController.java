@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class TagController {
 
@@ -44,9 +45,10 @@ public class TagController {
         return ResponseEntity.ok(questions);
     }
 
-    /*@PostMapping("/tag")
+    @PostMapping("/tag")
     public ResponseEntity<Void> createTag(@Login Member loginMember, @RequestBody TagRequestDTO tagReqeustDTO) {
-        tagService.
+        tagService.createTag(loginMember.getId(), tagReqeustDTO.getTags());
+        return ResponseEntity.ok().build();
 
-    }*/
+    }
 }

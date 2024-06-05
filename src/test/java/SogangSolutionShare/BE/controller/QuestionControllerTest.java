@@ -189,7 +189,7 @@ public class QuestionControllerTest {
         Long memberId = member.getId();
         QuestionDTO createdQuestion = questionService.createQuestion(memberId, questionRequestDTO);
 
-        mockMvc.perform(get("/search")
+        mockMvc.perform(get("/api/search")
                 .param("q", "title")
                 .session(session))
                 .andExpect(status().isOk())
@@ -209,7 +209,7 @@ public class QuestionControllerTest {
         Long memberId = member.getId();
         QuestionDTO createdQuestion = questionService.createQuestion(memberId, questionRequestDTO);
 
-        ResultActions resultActions = mockMvc.perform(get("/questions/count")
+        ResultActions resultActions = mockMvc.perform(get("/api/questions/count")
                         .session(session))
                 .andExpect(status().isOk());
 

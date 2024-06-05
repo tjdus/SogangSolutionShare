@@ -27,15 +27,17 @@ public class LoginControllerTest {
     public void 회원가입_로그인_로그아웃() throws Exception {
         session = new MockHttpSession();
         // 회원가입
-        mockMvc.perform(post("/join")
+        mockMvc.perform(post("/api/join")
                         .contentType("application/form-data")
                         .param("loginId", "tester1")
                         .param("password", "tester1")
                         .param("name", "tester1")
-                        .param("email", "tester1@naver.com"))
+                        .param("email", "tester1@naver.com")
+                        .param("isAuthorized", "true")
+                )
                 .andExpect(status().isCreated());
         // 로그인
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/api/login")
                         .session(session)
                         .contentType("application/form-data")
                         .param("loginId", "tester1")
@@ -46,7 +48,7 @@ public class LoginControllerTest {
         Assertions.assertThat(loginMember).isNotNull();
 
         // 로그아웃
-        mockMvc.perform(post("/logout")
+        mockMvc.perform(post("/api/logout")
                         .session(session))
                 .andExpect(status().isOk());
 

@@ -30,7 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginCheckInterceptor())
                 .addPathPatterns("/**")
-                .excludePathPatterns("/join", "/login", "/logout", "/email/**", "/oauth/**", "/session");
+                .excludePathPatterns("/api/join", "/api/login", "/api/logout", "/api/email/**", "/api/oauth/**", "/api/session");
     }
 
     @Override
