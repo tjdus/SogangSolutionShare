@@ -15,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+
 import static SogangSolutionShare.BE.controller.PageableUtil.createPageable;
 
 @Service
@@ -31,5 +34,19 @@ public class TagService {
         Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
 
         return memberTagRepository.findAllByMember(member, pageable).map(MemberTag::getTag);
+    }
+
+    @Transactional
+    public void createTag(Long memberId, List<String> tags) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+        for (String tagName : tags) {
+            Tag tag = tagRepository.findByName(tagName).orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build()));
+
+            Optional<MemberTag> byMemberAndTag = memberTagRepository.findByMemberAndTag(member, tag);
+            if (byMemberAndTag.isEmpty()) {
+                memberTagRepository.save(MemberTag.builder().member(member).tag(tag).build());
+            }
+        }
     }
 }
