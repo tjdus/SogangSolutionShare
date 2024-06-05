@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import static SogangSolutionShare.BE.controller.PageableUtil.createPageable;
 
 @Service
@@ -32,15 +34,16 @@ public class ScrapService {
         Question question = questionRepository.findById(questionId).orElseThrow(QuestionNotFoundException::new);
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
-        scrapRepository.findByQuestionIdAndMemberId(questionId, memberId)
-                .ifPresent(scrap -> {
-                    throw new AlreadyScrapException();
-                });
+        Optional<Scrap> byQuestionIdAndMemberId = scrapRepository.findByQuestionIdAndMemberId(questionId, memberId);
 
-        scrapRepository.save(Scrap.builder()
-                .member(member)
-                .question(question)
-                .build());
+        if(byQuestionIdAndMemberId.isEmpty()) {
+            scrapRepository.save(Scrap.builder()
+                    .member(member)
+                    .question(question)
+                    .build());
+        }
+
+
     }
 
     @Transactional
@@ -55,6 +58,7 @@ public class ScrapService {
         return scrapRepository.findByQuestionIdAndMemberId(questionId, memberId).isPresent();
     }
 
+    @Transactional(readOnly = true)
     public Page<QuestionDTO> findScrapQuestionsByMemberId(Long memberId, Criteria criteria) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         Pageable pageable = createPageable(criteria.getPage(), criteria.getSize(), criteria.getOrderBy());
