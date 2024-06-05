@@ -1,21 +1,23 @@
 package SogangSolutionShare.BE.controller;
 
+import SogangSolutionShare.BE.annotation.Login;
+import SogangSolutionShare.BE.domain.Member;
 import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
+import SogangSolutionShare.BE.domain.dto.TagRequestDTO;
 import SogangSolutionShare.BE.service.QuestionService;
+import SogangSolutionShare.BE.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 public class TagController {
 
     private final QuestionService questionService;
+    private final TagService tagService;
     @GetMapping("/tag/{tagId}/questions")
     public ResponseEntity<Page<QuestionDTO>> getQuestionsByTagId(
             @RequestParam(name = "page", defaultValue = "1") int page,
@@ -41,4 +43,10 @@ public class TagController {
         Page<QuestionDTO> questions = questionService.findQuestionsByTags(criteria, tags);
         return ResponseEntity.ok(questions);
     }
+
+    /*@PostMapping("/tag")
+    public ResponseEntity<Void> createTag(@Login Member loginMember, @RequestBody TagRequestDTO tagReqeustDTO) {
+        tagService.
+
+    }*/
 }

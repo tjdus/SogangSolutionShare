@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class LoginController {
 
     private final MemberService loginService;
@@ -31,6 +33,8 @@ public class LoginController {
      */
     @PostMapping("/join")
     public ResponseEntity<String> join(@Validated @ModelAttribute JoinDTO joinDTO, Errors errors) {
+        log.info("Mapping /join");
+
         if(errors.hasErrors()) {
             // 400 Bad Request
             return ResponseEntity.badRequest().body(errors.getAllErrors().get(0).getDefaultMessage());
@@ -56,6 +60,8 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<MemberResponseDTO> login(@Validated @ModelAttribute LoginDTO loginDTO, Errors errors, HttpServletRequest request) {
+        log.info("Mapping /login");
+
         if(errors.hasErrors()) {
             // 400 Bad Request
             return ResponseEntity.badRequest().build();
@@ -80,6 +86,8 @@ public class LoginController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        log.info("Mapping /logout");
+
         HttpSession session = request.getSession();
         session.invalidate();
         //response.addCookie(new Cookie("JSESSIONID", null));
@@ -88,11 +96,17 @@ public class LoginController {
 
     @GetMapping("/session")
     public ResponseEntity<Void> session(HttpServletRequest request) {
+        log.info("Mapping /session");
+
         HttpSession session = request.getSession();
+
         Member member = (Member) session.getAttribute("loginMember");
         if(member == null || memberRepository.findById(member.getId()).isEmpty()) {
+            log.info("Session check Member is null");
             return ResponseEntity.status(401).build();
         }
+
+        log.info("Session check Member : {}", member);
 
         return ResponseEntity.ok().build();
     }

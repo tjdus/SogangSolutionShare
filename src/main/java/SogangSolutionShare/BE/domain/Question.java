@@ -38,7 +38,7 @@ public class Question {
 
     private String title;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @CreatedDate
