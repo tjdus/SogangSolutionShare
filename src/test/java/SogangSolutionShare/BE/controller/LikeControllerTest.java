@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -69,20 +70,18 @@ public class LikeControllerTest {
         question.setMember(member);
         questionRepository.save(question);
 
+        Answer answer = new Answer();
+        answer.setContent("content");
+        answer.setQuestion(question);
+        answer.setMember(member);
+        answerRepository.save(answer);
+
         question = new Question();
         question.setTitle("question1");
         question.setContent("content1");
         question.setCategory(category);
         question.setMember(member);
         questionRepository.save(question);
-
-
-
-        Answer answer = new Answer();
-        answer.setContent("content");
-        answer.setQuestion(question);
-        answer.setMember(member);
-        answerRepository.save(answer);
 
 
         session = new MockHttpSession();
@@ -98,13 +97,13 @@ public class LikeControllerTest {
 
         String in = objectMapper.writeValueAsString(questionLikeDTO);
 
-        mockMvc.perform(post("/like/question")
+        mockMvc.perform(post("/api/like/question")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
-        ResultActions resultActions = mockMvc.perform(get("/like/question/{questionId}", question.get().getId())
+        ResultActions resultActions = mockMvc.perform(get("/api/like/question/{questionId}", question.get().getId())
                         .session(session))
                 .andExpect(status().isOk());
 
@@ -122,13 +121,13 @@ public class LikeControllerTest {
 
         String in = objectMapper.writeValueAsString(questionLikeDTO);
 
-        mockMvc.perform(post("/dislike/question")
+        mockMvc.perform(post("/api/dislike/question")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
-        ResultActions resultActions = mockMvc.perform(get("/like/question/{questionId}", question.get().getId())
+        ResultActions resultActions = mockMvc.perform(get("/api/like/question/{questionId}", question.get().getId())
                         .session(session))
                 .andExpect(status().isOk());
 
@@ -139,25 +138,29 @@ public class LikeControllerTest {
     @Test
     public void createAnswerLike() throws Exception {
         Optional<Question> question = questionRepository.findByTitle("question");
-        Answer answer = answerRepository.findByQuestionId(question.get().getId()).get(0);
+        question.ifPresent(value -> log.info("question: {}", value));
+        List<Answer> answers = answerRepository.findByQuestionId(question.get().getId());
+
+        Answer answer = answers.get(0);
 
         AnswerLikeDTO answerLikeDTO = new AnswerLikeDTO();
         answerLikeDTO.setAnswerId(answer.getId());
 
         String in = objectMapper.writeValueAsString(answerLikeDTO);
 
-        mockMvc.perform(post("/like/answer")
+        mockMvc.perform(post("/api/like/answer")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
-        ResultActions resultActions = mockMvc.perform(get("/like/answer/{answerId}", answer.getId())
+        ResultActions resultActions = mockMvc.perform(get("/api/like/answer/{answerId}", answer.getId())
                         .session(session))
                 .andExpect(status().isOk());
 
         String result = resultActions.andReturn().getResponse().getContentAsString();
         assertEquals("1", result);
+
     }
 
     @Test
@@ -170,13 +173,13 @@ public class LikeControllerTest {
 
         String in = objectMapper.writeValueAsString(answerLikeDTO);
 
-        mockMvc.perform(post("/dislike/answer")
+        mockMvc.perform(post("/api/dislike/answer")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
-        ResultActions resultActions = mockMvc.perform(get("/like/answer/{answerId}", answer.getId())
+        ResultActions resultActions = mockMvc.perform(get("/api/like/answer/{answerId}", answer.getId())
                         .session(session))
                 .andExpect(status().isOk());
 
@@ -193,26 +196,26 @@ public class LikeControllerTest {
 
         String in = objectMapper.writeValueAsString(questionLikeDTO);
 
-        mockMvc.perform(post("/like/question")
+        mockMvc.perform(post("/api/like/question")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
-        ResultActions resultActions = mockMvc.perform(get("/like/question/{questionId}", question.get().getId())
+        ResultActions resultActions = mockMvc.perform(get("/api/like/question/{questionId}", question.get().getId())
                         .session(session))
                 .andExpect(status().isOk());
 
         String result = resultActions.andReturn().getResponse().getContentAsString();
         assertEquals("1", result);
 
-        mockMvc.perform(post("/dislike/question")
+        mockMvc.perform(post("/api/dislike/question")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
-        resultActions = mockMvc.perform(get("/like/question/{questionId}", question.get().getId())
+        resultActions = mockMvc.perform(get("/api/like/question/{questionId}", question.get().getId())
                         .session(session))
                 .andExpect(status().isOk());
 
@@ -230,26 +233,26 @@ public class LikeControllerTest {
 
         String in = objectMapper.writeValueAsString(answerLikeDTO);
 
-        mockMvc.perform(post("/like/answer")
+        mockMvc.perform(post("/api/like/answer")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
-        ResultActions resultActions = mockMvc.perform(get("/like/answer/{answerId}", answer.getId())
+        ResultActions resultActions = mockMvc.perform(get("/api/like/answer/{answerId}", answer.getId())
                         .session(session))
                 .andExpect(status().isOk());
 
         String result = resultActions.andReturn().getResponse().getContentAsString();
         assertEquals("1", result);
 
-        mockMvc.perform(post("/dislike/answer")
+        mockMvc.perform(post("/api/dislike/answer")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
-        resultActions = mockMvc.perform(get("/like/answer/{answerId}", answer.getId())
+        resultActions = mockMvc.perform(get("/api/like/answer/{answerId}", answer.getId())
                         .session(session))
                 .andExpect(status().isOk());
 
@@ -266,7 +269,7 @@ public class LikeControllerTest {
 
         String in = objectMapper.writeValueAsString(questionLikeDTO);
 
-        mockMvc.perform(post("/like/question")
+        mockMvc.perform(post("/api/like/question")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
@@ -279,14 +282,14 @@ public class LikeControllerTest {
 
         in = objectMapper.writeValueAsString(questionLikeDTO);
 
-        mockMvc.perform(post("/like/question")
+        mockMvc.perform(post("/api/like/question")
                         .session(session)
                         .contentType("application/json")
                         .content(in))
                 .andExpect(status().isOk());
 
 
-        ResultActions resultActions = mockMvc.perform(get("/profile/like/questions")
+        ResultActions resultActions = mockMvc.perform(get("/api/profile/like/questions")
                         .session(session)
                         .param("page", "1"))
                 .andExpect(status().isOk());

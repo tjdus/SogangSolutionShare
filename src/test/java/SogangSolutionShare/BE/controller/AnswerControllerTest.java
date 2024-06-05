@@ -49,11 +49,13 @@ public class AnswerControllerTest {
     @Test
     public void createAnswer() throws Exception {
         Member newMember = new Member();
-        newMember.setName("new member");
-        memberRepository.save(newMember);
+        newMember.setName("name");
+        Member questionMember = memberRepository.save(newMember);
 
-        Member questionMember = memberRepository.findByName("name").orElse(null);
-        Member answerMember = memberRepository.findByName("new member").orElse(null);
+        newMember = new Member();
+        newMember.setName("new member");
+        Member answerMember = memberRepository.save(newMember);
+
         // member 질문 생성
         Question question = Question.builder()
                 .member(questionMember)
@@ -77,11 +79,13 @@ public class AnswerControllerTest {
     @Test
     public void updateAnswer() {
         Member newMember = new Member();
-        newMember.setName("new member");
-        memberRepository.save(newMember);
+        newMember.setName("name");
+        Member questionMember = memberRepository.save(newMember);
 
-        Member questionMember = memberRepository.findByName("name").orElse(null);
-        Member answerMember = memberRepository.findByName("new member").orElse(null);
+        newMember = new Member();
+        newMember.setName("new member");
+        Member answerMember = memberRepository.save(newMember);
+
         // member 질문 생성
         Question question = Question.builder()
                 .member(questionMember)
@@ -112,11 +116,12 @@ public class AnswerControllerTest {
     @Test
     public void deleteAnswer(){
         Member newMember = new Member();
-        newMember.setName("new member");
-        memberRepository.save(newMember);
+        newMember.setName("name");
+        Member questionMember = memberRepository.save(newMember);
 
-        Member questionMember = memberRepository.findByName("name").orElse(null);
-        Member answerMember = memberRepository.findByName("new member").orElse(null);
+        newMember = new Member();
+        newMember.setName("new member");
+        Member answerMember = memberRepository.save(newMember);
         // member 질문 생성
         Question question = Question.builder()
                 .member(questionMember)
@@ -139,16 +144,17 @@ public class AnswerControllerTest {
     @Test
     public void getAnswers() throws Exception {
         // 멤버 생성
+        Member newMember = new Member();
+        newMember.setName("name");
+        Member questionMember = memberRepository.save(newMember);
+
         Member newMember1 = new Member();
         newMember1.setName("new member1");
-        memberRepository.save(newMember1);
+        Member answerMember1 = memberRepository.save(newMember1);
         Member newMember2 = new Member();
         newMember2.setName("new member2");
-        memberRepository.save(newMember2);
+        Member answerMember2 = memberRepository.save(newMember2);
 
-        Member questionMember = memberRepository.findByName("name").orElse(null);
-        Member answerMember1 = memberRepository.findByName("new member1").orElse(null);
-        Member answerMember2 = memberRepository.findByName("new member2").orElse(null);
         // member 질문 생성
         Question question = Question.builder()
                 .member(questionMember)

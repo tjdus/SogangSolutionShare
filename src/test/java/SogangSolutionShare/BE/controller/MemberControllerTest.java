@@ -31,12 +31,13 @@ public class MemberControllerTest {
 
     @Test
     public void createMember() throws Exception {
-        mockMvc.perform(post("/join")
+        mockMvc.perform(post("/api/join")
                         .param("loginId", "tester1")
                         .param("password", "1234")
                         .param("name", "tester2")
-                        .param("email", "tester1@naver.com"))
-                .andExpect(status().isOk());
+                        .param("email", "tester1@naver.com")
+                        .param("isAuthorized", "true"))
+                .andExpect(status().isCreated());
 
         memberRepository.findByLoginId("tester1").ifPresent(
                 member -> {
@@ -50,26 +51,5 @@ public class MemberControllerTest {
     public void getQuestions() {
 
     }
-    @Test
-    public void getMembers() throws Exception {
-        mockMvc.perform(post("/join")
-                        .param("loginID", "tester2")
-                        .param("password", "1234")
-                        .param("name", "tester2")
-                        .param("email", "tester1@naver.com"))
-                .andExpect(status().isOk());
-        mockMvc.perform(post("/join")
-                        .param("loginID", "tester3")
-                        .param("password", "1234")
-                        .param("name", "tester3")
-                        .param("email", "tester2@naver.com"))
-                .andExpect(status().isOk());
-
-        /*mockMvc.perform(get("/member/members"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value("tester1"));*/
-    }
-
 
 }

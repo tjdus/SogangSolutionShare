@@ -55,7 +55,7 @@ public class EmailControllerTest {
         emailRequestDTO.setEmail("bon0057@naver.com");
 
         // when
-        mockMvc.perform(post("/email/send")
+        mockMvc.perform(post("/api/email/send")
                 .session(session)
                 .content(objectMapper.writeValueAsString(emailRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -68,7 +68,7 @@ public class EmailControllerTest {
         emailCheckDTO.setAuthorizationNumber(temp.getAuthorizationNumber());
 
         // then
-        mockMvc.perform(post("/email/check")
+        mockMvc.perform(post("/api/email/check")
                 .session(session)
                 .content(objectMapper.writeValueAsString(emailCheckDTO))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -82,7 +82,7 @@ public class EmailControllerTest {
         emailRequestDTO.setEmail("bon0057@naver.com");
 
         // when
-        mockMvc.perform(post("/email/send")
+        mockMvc.perform(post("/api/email/send")
                         .session(session)
                         .content(objectMapper.writeValueAsString(emailRequestDTO))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -101,7 +101,7 @@ public class EmailControllerTest {
         emailCheckDTO.setAuthorizationNumber(temp.getAuthorizationNumber());
 
         // then
-        mockMvc.perform(post("/email/check")
+        mockMvc.perform(post("/api/email/check")
                         .session(session)
                         .content(objectMapper.writeValueAsString(emailCheckDTO))
                         .contentType(MediaType.APPLICATION_JSON))
