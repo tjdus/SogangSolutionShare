@@ -45,11 +45,12 @@ public class LikeService {
         } else if(ql.isEmpty()) {
             // 좋아요 & 싫어요를 누르지 않았다면 좋아요를 누른다.
             question.setLikeCount(question.getLikeCount()+1);
-            questionLikeRepository.save(QuestionLike.builder()
+            QuestionLike questionLike = questionLikeRepository.save(QuestionLike.builder()
                     .question(question)
                     .member(member)
                     .isLike(true)
                     .build());
+            member.getQuestionLikes().add(questionLike);
         }
     }
 

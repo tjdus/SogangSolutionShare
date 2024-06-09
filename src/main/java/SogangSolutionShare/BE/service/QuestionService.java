@@ -72,7 +72,8 @@ public class QuestionService {
         // 태그 저장
         tagList.forEach(createdQuestion::addQuestionTag);
 
-        questionRepository.save(createdQuestion);
+        Question question = questionRepository.save(createdQuestion);
+        member.getQuestions().add(question);
 
         // 첨부파일 저장
         if(questionRequest.getAttachments() == null) {

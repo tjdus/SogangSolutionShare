@@ -18,4 +18,7 @@ public interface MemberTagRepository extends JpaRepository<MemberTag, Long> {
     Page<MemberTag> findAllByMember(Member member, Pageable pageable);
 
     Optional<MemberTag> findByMemberAndTag(Member member, Tag tag);
+
+    void deleteByMemberAndTag(Member member, Tag tag);
+
 }

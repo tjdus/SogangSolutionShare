@@ -32,4 +32,13 @@ public class QuestionTag {
 
     @CreatedDate
     private LocalDateTime createdAt;
+
+
+    @Override
+    public String toString() {
+        return "QuestionTag{" +
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }
