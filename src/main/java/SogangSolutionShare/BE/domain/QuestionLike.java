@@ -33,4 +33,12 @@ public class QuestionLike {
 
     private Boolean isLike;
 
+    @Override
+    public String toString() {
+        return "QuestionLike{" +
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                ", isLike=" + isLike +
+                '}';
+    }
 }

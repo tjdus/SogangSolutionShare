@@ -60,4 +60,17 @@ public class Answer {
                 .updatedAt(updatedAt)
                 .build();
     }
+
+    @Override
+    public String toString() {
+        return "Answer{" +
+                "id=" + id +
+                ", idx=" + idx +
+                ", content='" + content + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", likeCount=" + likeCount +
+                ", dislikeCount=" + dislikeCount +
+                '}';
+    }
 }

@@ -33,4 +33,14 @@ public class AnswerLike {
     private LocalDateTime createdAt;
 
     private Boolean isLike;
+
+    @Override
+    public String toString() {
+        return "AnswerLike{" +
+                "id=" + id +
+                ", answer=" + answer +
+                ", createdAt=" + createdAt +
+                ", isLike=" + isLike +
+                '}';
+    }
 }
