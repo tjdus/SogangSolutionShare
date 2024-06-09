@@ -19,14 +19,12 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession();
         Member member = (Member) session.getAttribute("loginMember");
 
-        log.info("로그인 사용자 정보: {}", member);
-
         if (member == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요합니다.");
             return false;
         }
 
-        log.info("로그인 사용자 인증 체크 완료");
+        log.info("로그인 사용자 정보: {}", member);
 
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
