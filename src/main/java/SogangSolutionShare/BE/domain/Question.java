@@ -74,6 +74,9 @@ public class Question {
     @Builder.Default
     private List<Attachment> attachments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuestionLike> questionLikes = new ArrayList<>();
+
     @Override
     public String toString() {
         return "Question{" +

@@ -51,4 +51,10 @@ public class TagController {
         return ResponseEntity.ok().build();
 
     }
+
+    @DeleteMapping("/tag/{tagName}")
+    public ResponseEntity<Void> deleteTag(@Login Member loginMember, @PathVariable("tagName") String tagName) {
+        tagService.deleteTag(loginMember.getId(), tagName);
+        return ResponseEntity.ok().build();
+    }
 }

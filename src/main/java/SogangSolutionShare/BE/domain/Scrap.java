@@ -33,4 +33,13 @@ public class Scrap {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Override
+    public String toString() {
+        return "Scrap{" +
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

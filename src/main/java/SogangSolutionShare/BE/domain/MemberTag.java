@@ -29,4 +29,12 @@ public class MemberTag {
 
     @CreatedDate
     private LocalDateTime createdAt;
+
+    @Override
+    public String toString() {
+        return "MemberTag{" +
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

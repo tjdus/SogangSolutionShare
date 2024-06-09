@@ -37,10 +37,11 @@ public class ScrapService {
         Optional<Scrap> byQuestionIdAndMemberId = scrapRepository.findByQuestionIdAndMemberId(questionId, memberId);
 
         if(byQuestionIdAndMemberId.isEmpty()) {
-            scrapRepository.save(Scrap.builder()
+            Scrap scrap = scrapRepository.save(Scrap.builder()
                     .member(member)
                     .question(question)
                     .build());
+            member.getScraps().add(scrap);
         }
 
 

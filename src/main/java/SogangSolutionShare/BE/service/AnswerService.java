@@ -56,6 +56,7 @@ public class AnswerService {
                 .idx(question.getAnswers().size() + 1)
                 .build();
         question.addAnswer(createdAnswer);
+        member.getAnswers().add(createdAnswer);
 
         log.info("Answer created: {}", createdAnswer);
 

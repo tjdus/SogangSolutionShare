@@ -45,8 +45,17 @@ public class TagService {
 
             Optional<MemberTag> byMemberAndTag = memberTagRepository.findByMemberAndTag(member, tag);
             if (byMemberAndTag.isEmpty()) {
-                memberTagRepository.save(MemberTag.builder().member(member).tag(tag).build());
+                MemberTag memberTag = memberTagRepository.save(MemberTag.builder().member(member).tag(tag).build());
+                member.getMemberTags().add(memberTag);
             }
         }
+    }
+
+    @Transactional
+    public void deleteTag(Long memberId, String tagName) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        Optional<Tag> tag = tagRepository.findByName(tagName);
+
+        tag.ifPresent(value -> memberTagRepository.deleteByMemberAndTag(member, value));
     }
 }

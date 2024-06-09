@@ -1,13 +1,12 @@
 package SogangSolutionShare.BE.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -21,7 +20,21 @@ public class Tag {
 
     private String name;
 
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
+    private List<QuestionTag> questionTags;
+
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
+    private List<MemberTag> memberTags;
+
     public Tag(String tagName) {
         this.name = tagName;
+    }
+
+    @Override
+    public String toString() {
+        return "Tag{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }
