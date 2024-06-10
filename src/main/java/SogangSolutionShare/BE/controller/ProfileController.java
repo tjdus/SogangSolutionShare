@@ -8,6 +8,7 @@ import SogangSolutionShare.BE.domain.Tag;
 import SogangSolutionShare.BE.domain.dto.AnswerDTO;
 import SogangSolutionShare.BE.domain.dto.Criteria;
 import SogangSolutionShare.BE.domain.dto.QuestionDTO;
+import SogangSolutionShare.BE.domain.dto.TagDTO;
 import SogangSolutionShare.BE.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -99,7 +100,7 @@ public class ProfileController {
 
     // 내가 작성한 태그 조회 API
     @GetMapping("/tags")
-    public ResponseEntity<Page<Tag>> getTags(
+    public ResponseEntity<Page<TagDTO>> getTags(
             @Login Member loginMember,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size",defaultValue = "10") int size,
@@ -108,7 +109,7 @@ public class ProfileController {
         Criteria criteria = new Criteria(page - 1, size, orderBy);
 
         Page<Tag> tags = tagService.findTagsByMemberId(loginMember.getId(), criteria);
-        return ResponseEntity.ok(tags);
+        return ResponseEntity.ok(tags.map(Tag::toDTO));
     }
 
 
