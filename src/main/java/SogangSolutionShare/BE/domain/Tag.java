@@ -1,5 +1,6 @@
 package SogangSolutionShare.BE.domain;
 
+import SogangSolutionShare.BE.domain.dto.TagDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +29,13 @@ public class Tag {
 
     public Tag(String tagName) {
         this.name = tagName;
+    }
+
+    public TagDTO toDTO() {
+        return TagDTO.builder()
+                .id(this.id)
+                .name(this.name)
+                .build();
     }
 
     @Override

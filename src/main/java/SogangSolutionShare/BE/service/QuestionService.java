@@ -49,18 +49,6 @@ public class QuestionService {
         Category category = categoryRepository.findByName(questionRequest.getCategory())
                 .orElseThrow(CategoryNotFoundException::new);
 
-        // TagName으로 Tag 찾아서 없으면 태그 생성
-        List<Tag> tagList = questionRequest.getTags().stream()
-                .map(tagName -> tagRepository.findByName(tagName)
-                        .orElseGet(() -> tagRepository.save(new Tag(tagName))))
-                .toList();
-
-        tagList.forEach(tag -> memberTagRepository.findByMemberAndTag(member, tag)
-                .orElseGet(() -> memberTagRepository.save(MemberTag.builder()
-                        .member(member)
-                        .tag(tag)
-                        .build())));
-
         // 질문 생성
         Question createdQuestion = Question.builder()
                 .member(member)
@@ -69,8 +57,24 @@ public class QuestionService {
                 .content(questionRequest.getContent())
                 .build();
 
+        // TagName으로 Tag 찾아서 없으면 태그 생성
+        if(questionRequest.getTags() != null) {
+            List<Tag> tagList = questionRequest.getTags().stream()
+                    .map(tagName -> tagRepository.findByName(tagName)
+                            .orElseGet(() -> tagRepository.save(new Tag(tagName))))
+                    .toList();
+
+            tagList.forEach(tag -> memberTagRepository.findByMemberAndTag(member, tag)
+                    .orElseGet(() -> memberTagRepository.save(MemberTag.builder()
+                            .member(member)
+                            .tag(tag)
+                            .build())));
+            tagList.forEach(createdQuestion::addQuestionTag);
+        }
+
+
+
         // 태그 저장
-        tagList.forEach(createdQuestion::addQuestionTag);
 
         Question question = questionRepository.save(createdQuestion);
         member.getQuestions().add(question);
