@@ -8,7 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Member findByKakaoId(Long kakaoId);
 
     Optional<Member> findByEmail(String email);
 

@@ -17,7 +17,6 @@ public record KaKaoMemberResponse (
     public Member toMember() {
         return Member.builder()
                 .name(kakaoAccount.profile.nickname)
-                .kakaoId(id)
                 .build();
     }
 

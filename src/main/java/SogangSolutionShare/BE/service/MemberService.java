@@ -27,7 +27,7 @@ public class MemberService {
     @Transactional
     public String createMember(JoinDTO joinDTO) {
         // 같은 로그인 아이디 혹은 같은 이메일을 가진 Member 이미 존재하면 예외처리
-        if(memberRepository.findByEmail(joinDTO.getLoginId()).isPresent()) {
+        if(memberRepository.findByEmail(joinDTO.getEmail()).isPresent()) {
             return "이미 가입된 이메일입니다.";
         }
         else if(memberRepository.findByLoginId(joinDTO.getLoginId()).isPresent()) {

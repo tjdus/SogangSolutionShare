@@ -26,7 +26,6 @@ public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long kakaoId;
 
     private String loginId;
 
@@ -45,21 +44,27 @@ public class Member {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<MemberTag> memberTags = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Question> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Answer> answers = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<QuestionLike> questionLikes = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<AnswerLike> answerLikes = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Scrap> scraps = new ArrayList<>();
 
 
@@ -71,7 +76,6 @@ public class Member {
     public String toString() {
         return "Member{" +
                 "id=" + id +
-                ", kakaoId=" + kakaoId +
                 ", loginId='" + loginId + '\'' +
                 ", password='" + password + '\'' +
                 ", name='" + name + '\'' +
