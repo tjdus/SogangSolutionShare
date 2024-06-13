@@ -38,7 +38,7 @@ public class Question {
 
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMBLOB")
     private String content;
 
     @CreatedDate
@@ -75,6 +75,7 @@ public class Question {
     private List<Attachment> attachments = new ArrayList<>();
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<QuestionLike> questionLikes = new ArrayList<>();
 
     @Override

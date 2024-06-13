@@ -26,12 +26,12 @@ public class OauthController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/login/kakao")
+    /*@GetMapping("/login/kakao")
     public ResponseEntity<Long> loginWithKakao(
             @RequestParam String code) {
         log.info("code: {}", code);
         Long loginId = oauthService.loginWithKaKao(code);
         log.info("loginId: {}", loginId);
         return ResponseEntity.ok(loginId);
-    }
+    }*/
 }

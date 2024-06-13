@@ -18,7 +18,7 @@ public class OauthService {
         return kakaoOauthCodeRequestUriProvider.getOauthCodeRequestUri();
     }
 
-    public Long loginWithKaKao(String code) {
+    /*public Long loginWithKaKao(String code) {
         Member member = kaKaoMemberClient.fetch(code);
 
         Member find = memberRepository.findByKakaoId(member.getKakaoId());
@@ -27,5 +27,5 @@ public class OauthService {
             return saved.getId();
         }
         return find.getId();
-    }
+    }*/
 }
